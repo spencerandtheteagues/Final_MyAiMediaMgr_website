@@ -1,0 +1,79 @@
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime, timedelta
+
+db = SQLAlchemy()
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    
+    # Subscription fields
+    subscription_tier = db.Column(db.String(20), default='trial')  # trial, starter, pro, agency
+    subscription_status = db.Column(db.String(20), default='trial')  # trial, active, expired, cancelled
+    trial_start_date = db.Column(db.DateTime, default=datetime.utcnow)
+    trial_end_date = db.Column(db.DateTime, default=lambda: datetime.utcnow() + timedelta(days=14))
+    subscription_start_date = db.Column(db.DateTime)
+    subscription_end_date = db.Column(db.DateTime)
+    
+    # Credits and usage
+    credits_remaining = db.Column(db.Integer, default=500)  # Default trial credits
+    credits_total = db.Column(db.Integer, default=500)
+    
+    # Payment information
+    stripe_customer_id = db.Column(db.String(100))
+    stripe_subscription_id = db.Column(db.String(100))
+    payment_method_verified = db.Column(db.Boolean, default=False)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<User {self.username}>'
+    
+    def is_trial_active(self):
+        """Check if user's trial is still active"""
+        return (self.subscription_status == 'trial' and 
+                self.trial_end_date and 
+                datetime.utcnow() < self.trial_end_date)
+    
+    def is_subscription_active(self):
+        """Check if user has an active subscription"""
+        return (self.subscription_status == 'active' and 
+                self.subscription_end_date and 
+                datetime.utcnow() < self.subscription_end_date)
+    
+    def has_access(self):
+        """Check if user has access to the platform"""
+        return self.is_trial_active() or self.is_subscription_active()
+    
+    def get_plan_credits(self):
+        """Get credits based on subscription tier"""
+        plan_credits = {
+            'trial': 500,
+            'starter': 500,
+            'pro': 2000,
+            'agency': 10000
+        }
+        return plan_credits.get(self.subscription_tier, 500)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'subscription_tier': self.subscription_tier,
+            'subscription_status': self.subscription_status,
+            'trial_start_date': self.trial_start_date.isoformat() if self.trial_start_date else None,
+            'trial_end_date': self.trial_end_date.isoformat() if self.trial_end_date else None,
+            'subscription_start_date': self.subscription_start_date.isoformat() if self.subscription_start_date else None,
+            'subscription_end_date': self.subscription_end_date.isoformat() if self.subscription_end_date else None,
+            'credits_remaining': self.credits_remaining,
+            'credits_total': self.credits_total,
+            'payment_method_verified': self.payment_method_verified,
+            'has_access': self.has_access(),
+            'is_trial_active': self.is_trial_active(),
+            'is_subscription_active': self.is_subscription_active(),
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
