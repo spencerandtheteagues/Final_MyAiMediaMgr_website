@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from src.models.user import db
 from src.routes.user import user_bp
 from src.routes.content import content_bp
+from flask_migrate import Migrate
 from src.routes.subscription import subscription_bp
 
 # Load environment variables
@@ -28,6 +29,7 @@ app.register_blueprint(subscription_bp, url_prefix='/api/subscription')
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
+migrate = Migrate(app, db)
 with app.app_context():
     db.create_all()
 

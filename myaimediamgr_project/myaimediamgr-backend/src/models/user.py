@@ -7,19 +7,26 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    
+    password_hash = db.Column(db.String(128))
+    role = db.Column(db.String(20), default='user', nullable=False)  # 'user' or 'admin'
+
     # Subscription fields
-    subscription_tier = db.Column(db.String(20), default='trial')  # trial, starter, pro, agency
-    subscription_status = db.Column(db.String(20), default='trial')  # trial, active, expired, cancelled
+    subscription_tier = db.Column(db.String(20), default='trial')  # trial, starter, pro, business, enterprise
+    subscription_status = db.Column(db.String(20), default='trialing')  # trialing, active, expired, canceled
     trial_start_date = db.Column(db.DateTime, default=datetime.utcnow)
     trial_end_date = db.Column(db.DateTime, default=lambda: datetime.utcnow() + timedelta(days=14))
     subscription_start_date = db.Column(db.DateTime)
     subscription_end_date = db.Column(db.DateTime)
-    
-    # Credits and usage
-    credits_remaining = db.Column(db.Integer, default=500)  # Default trial credits
-    credits_total = db.Column(db.Integer, default=500)
-    
+    quota_reset_date = db.Column(db.DateTime, default=lambda: datetime.utcnow() + timedelta(days=30))
+
+    # Quota fields
+    image_quota = db.Column(db.Integer, default=20)
+    image_quota_remaining = db.Column(db.Integer, default=20)
+    video_v2_quota = db.Column(db.Integer, default=2)
+    video_v2_quota_remaining = db.Column(db.Integer, default=2)
+    video_v3_quota = db.Column(db.Integer, default=0)
+    video_v3_quota_remaining = db.Column(db.Integer, default=0)
+
     # Payment information
     stripe_customer_id = db.Column(db.String(100))
     stripe_subscription_id = db.Column(db.String(100))
@@ -33,7 +40,7 @@ class User(db.Model):
     
     def is_trial_active(self):
         """Check if user's trial is still active"""
-        return (self.subscription_status == 'trial' and 
+        return (self.subscription_status == 'trialing' and 
                 self.trial_end_date and 
                 datetime.utcnow() < self.trial_end_date)
     
@@ -45,31 +52,27 @@ class User(db.Model):
     
     def has_access(self):
         """Check if user has access to the platform"""
-        return self.is_trial_active() or self.is_subscription_active()
-    
-    def get_plan_credits(self):
-        """Get credits based on subscription tier"""
-        plan_credits = {
-            'trial': 500,
-            'starter': 500,
-            'pro': 2000,
-            'agency': 10000
-        }
-        return plan_credits.get(self.subscription_tier, 500)
+        return self.is_trial_active() or self.is_subscription_active() or self.role == 'admin'
 
     def to_dict(self):
         return {
             'id': self.id,
             'username': self.username,
             'email': self.email,
+            'role': self.role,
             'subscription_tier': self.subscription_tier,
             'subscription_status': self.subscription_status,
             'trial_start_date': self.trial_start_date.isoformat() if self.trial_start_date else None,
             'trial_end_date': self.trial_end_date.isoformat() if self.trial_end_date else None,
             'subscription_start_date': self.subscription_start_date.isoformat() if self.subscription_start_date else None,
             'subscription_end_date': self.subscription_end_date.isoformat() if self.subscription_end_date else None,
-            'credits_remaining': self.credits_remaining,
-            'credits_total': self.credits_total,
+            'quota_reset_date': self.quota_reset_date.isoformat() if self.quota_reset_date else None,
+            'image_quota': self.image_quota,
+            'image_quota_remaining': self.image_quota_remaining,
+            'video_v2_quota': self.video_v2_quota,
+            'video_v2_quota_remaining': self.video_v2_quota_remaining,
+            'video_v3_quota': self.video_v3_quota,
+            'video_v3_quota_remaining': self.video_v3_quota_remaining,
             'payment_method_verified': self.payment_method_verified,
             'has_access': self.has_access(),
             'is_trial_active': self.is_trial_active(),
