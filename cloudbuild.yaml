@@ -7,6 +7,18 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest']
 
+  # Apply database migrations
+  - name: 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest'
+    entrypoint: 'python'
+    args: ['-m', 'flask', '--app', 'src/main', 'db', 'upgrade']
+
+  # Seed the admin user
+  - name: 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest'
+    entrypoint: 'python'
+    args: ['-m', 'src.seed_admin']
+    env:
+      - 'FLASK_APP=src/main.py'
+
   # Deploy container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
@@ -19,7 +31,7 @@ steps:
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--service-account=myaimediamgr-service@final-myaimediamgr-website.iam.gserviceaccount.com'
-      - '--set-env-vars=GOOGLE_PROJECT_ID=final-myaimediamgr-website,GEMINI_API_KEY=AIzaSyDthpeK9UNiHEj2VGtmqp-p_rXR01iLXKs'
+      - '--set-env-vars=GOOGLE_PROJECT_ID=final-myaimediamgr-website'
 
 images:
   - 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest'
