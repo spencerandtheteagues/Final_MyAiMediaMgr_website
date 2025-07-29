@@ -1,11 +1,11 @@
 steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:$SHORT_SHA', '.']
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest', '.']
 
   # Push the container image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:$SHORT_SHA']
+    args: ['push', 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest']
 
   # Deploy container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -14,12 +14,11 @@ steps:
       - 'run'
       - 'deploy'
       - 'myaimediamgr-prod'
-      - '--image=us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:$SHORT_SHA'
+      - '--image=us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest'
       - '--region=us-central1'
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--service-account=myaimediamgr-service@final-myaimediamgr-website.iam.gserviceaccount.com'
-      - '--port=8080'
 
 images:
-  - 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:$SHORT_SHA'
+  - 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest'

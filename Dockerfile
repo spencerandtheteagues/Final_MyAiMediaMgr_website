@@ -1,9 +1,9 @@
 # Stage 1: Build Frontend
 FROM node:20-slim AS frontend-builder
-WORKDIR /app/frontend
-COPY myaimediamgr_project/myaimediamgr-frontend/package*.json ./
-RUN npm install
-COPY myaimediamgr_project/myaimediamgr-frontend/ .
+WORKDIR /app
+COPY . .
+WORKDIR /app/myaimediamgr_project/myaimediamgr-frontend
+RUN npm install --legacy-peer-deps
 RUN npm run build
 
 # Stage 2: Build Backend
@@ -17,8 +17,8 @@ COPY myaimediamgr_project/myaimediamgr-backend/ .
 FROM python:3.11-slim
 WORKDIR /app
 COPY --from=backend-builder /app/backend/ .
-COPY --from=frontend-builder /app/frontend/dist ./src/static
+COPY --from=frontend-builder /app/myaimediamgr_project/myaimediamgr-frontend/dist ./src/static
 
 # Expose port and run the application
 EXPOSE 8080
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "src.main:app"]
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 src.main:app

@@ -1,1 +1,1 @@
-feat: Overhaul application architecture and implement new subscription model
+fix: Finalize production deployment configuration
