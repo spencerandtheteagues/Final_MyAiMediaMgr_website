@@ -33,8 +33,8 @@ steps:
       - '--service-account=myaimediamgr-service@final-myaimediamgr-website.iam.gserviceaccount.com'
       - '--set-env-vars=GOOGLE_PROJECT_ID=final-myaimediamgr-website'
 
-options:
-  logging: CLOUD_LOGGING_ONLY
-
 images:
   - 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
