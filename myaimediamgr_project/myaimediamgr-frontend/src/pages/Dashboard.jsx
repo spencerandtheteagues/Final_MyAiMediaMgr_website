@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { 
   Users, 
   MessageCircle, 
@@ -12,7 +13,8 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  BarChart3
+  BarChart3,
+  Link as LinkIcon
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -117,6 +119,7 @@ const quickActions = [
 
 function Dashboard() {
   const [timeRange, setTimeRange] = useState('7')
+  const [hasConnectedAccounts, setHasConnectedAccounts] = useState(false) // Set to false to show prompt
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -171,25 +174,45 @@ function Dashboard() {
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {metrics.map((metric, index) => (
-          <Card key={index} className="bg-slate-800/30 border-slate-700/50 backdrop-blur-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-400 mb-1">{metric.title}</p>
-                  <p className="text-2xl font-bold text-white">{metric.value}</p>
-                  <p className={`text-sm ${metric.changeType === 'positive' ? 'text-green-400' : 'text-red-400'}`}>
-                    {metric.change}
-                  </p>
-                </div>
-                <div className={`w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center`}>
-                  <metric.icon className={`w-6 h-6 ${metric.color}`} />
-                </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="dashboard-grid">
+        {!hasConnectedAccounts ? (
+          <Card className="lg:col-span-4 bg-slate-800/30 border-slate-700/50 backdrop-blur-sm">
+            <CardContent className="p-8 flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 rounded-full bg-slate-700/50 flex items-center justify-center mb-4">
+                <LinkIcon className="w-8 h-8 text-slate-400" />
               </div>
+              <h3 className="text-xl font-bold text-white mb-2">Connect Your Accounts</h3>
+              <p className="text-slate-400 mb-6 max-w-md">
+                Link your social media profiles to start tracking your performance, view key metrics, and unlock powerful analytics.
+              </p>
+              <Link to="/platforms">
+                <Button className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700">
+                  <LinkIcon className="w-4 h-4 mr-2" />
+                  Connect Accounts
+                </Button>
+              </Link>
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          metrics.map((metric, index) => (
+            <Card key={index} className="bg-slate-800/30 border-slate-700/50 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-slate-400 mb-1">{metric.title}</p>
+                    <p className="text-2xl font-bold text-white">{metric.value}</p>
+                    <p className={`text-sm ${metric.changeType === 'positive' ? 'text-green-400' : 'text-red-400'}`}>
+                      {metric.change}
+                    </p>
+                  </div>
+                  <div className={`w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center`}>
+                    <metric.icon className={`w-6 h-6 ${metric.color}`} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -333,4 +356,3 @@ function Dashboard() {
 }
 
 export default Dashboard
-

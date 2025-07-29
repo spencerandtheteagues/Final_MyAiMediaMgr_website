@@ -13,7 +13,7 @@ try:
     from flask_cors import CORS
     from dotenv import load_dotenv
     from flask_migrate import Migrate
-    from src.models.user import db
+    from src.database import db
     from src.routes.user import user_bp
     from src.routes.content import content_bp
     from src.routes.subscription import subscription_bp

@@ -1,69 +1,109 @@
-import { useState } from 'react';
-import { X, Zap, Image, Video, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 
 const Tour = ({ onExit }) => {
   const [step, setStep] = useState(0);
-
-  const steps = [
+  const tourSteps = [
     {
-      title: 'Welcome to the MyAiMediaMgr Tour!',
-      content: 'This quick tour will walk you through the powerful AI-powered features available in our paid plans.',
-      icon: Zap,
+      title: 'Welcome to MyAiMediaMgr!',
+      content: 'This tour will guide you through the key features of the platform. You are currently in a demo account with pre-populated data.',
+      selector: null,
     },
     {
-      title: 'AI-Powered Image Generation',
-      content: 'Create stunning, high-quality images for your posts with a simple text prompt. Here is an example of an image generated with Imagen 4.',
-      media: <img src="https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png" alt="AI Generated" className="rounded-lg" />,
-      icon: Image,
+      title: 'The Dashboard',
+      content: 'This is your main dashboard, giving you a high-level overview of your social media performance.',
+      selector: '[data-testid="dashboard-grid"]',
     },
     {
-      title: 'Premium Video Generation',
-      content: 'Generate short, engaging videos for your campaigns. This example was created with Veo 3, available on our Enterprise plan.',
-      media: <video src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" controls className="rounded-lg w-full" />,
-      icon: Video,
+      title: 'Content Generation',
+      content: 'Use our AI-powered tools to generate text, images, and videos for your campaigns.',
+      selector: '[data-testid="generate-content-link"]',
     },
     {
-      title: 'Ready to Get Started?',
-      content: 'Sign up for a 14-day free trial to start scheduling posts with your own content, or choose a plan to unlock our powerful AI features.',
-      icon: ArrowRight,
+      title: 'Approval Queue',
+      content: 'Review, edit, and approve all generated content before it gets published. Here you can see examples of image and video posts awaiting approval.',
+      selector: '[data-testid="approval-queue-link"]',
+    },
+    {
+      title: 'Platform Management',
+      content: 'Connect and manage all of your social media accounts in one place.',
+      selector: '[data-testid="platforms-link"]',
+    },
+    {
+      title: 'End of Tour',
+      content: 'You will now be logged out of the demo account. Thanks for taking a look!',
+      selector: null,
     },
   ];
 
-  const currentStep = steps[step];
-
-  const handleNext = () => {
-    if (step < steps.length - 1) {
-      setStep(step + 1);
-    } else {
-      onExit();
+  useEffect(() => {
+    if (step === tourSteps.length - 1) {
+      setTimeout(() => {
+        onExit();
+      }, 3000);
     }
-  };
+  }, [step, onExit, tourSteps.length]);
+
+  const currentStep = tourSteps[step];
+  const highlightElement = currentStep.selector ? document.querySelector(currentStep.selector) : null;
+  const elementRect = highlightElement ? highlightElement.getBoundingClientRect() : null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md text-white relative">
-        <button onClick={onExit} className="absolute top-4 right-4 text-slate-400 hover:text-white">
-          <X className="w-5 h-5" />
-        </button>
-        <div className="p-8">
-          <div className="flex items-center space-x-4 mb-6">
-            <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center">
-              <currentStep.icon className="w-6 h-6 text-purple-400" />
-            </div>
-            <h2 className="text-2xl font-bold">{currentStep.title}</h2>
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center">
+      <div
+        className="absolute bg-white rounded-lg shadow-xl p-6 w-96 transition-all duration-300"
+        style={
+          elementRect
+            ? {
+                top: `${elementRect.bottom + 10}px`,
+                left: `${elementRect.left}px`,
+              }
+            : {}
+        }
+      >
+        <h3 className="text-lg font-bold mb-2">{currentStep.title}</h3>
+        <p className="text-sm text-gray-600 mb-4">{currentStep.content}</p>
+        <div className="flex justify-between items-center">
+          <span className="text-xs text-gray-500">
+            {step + 1} / {tourSteps.length}
+          </span>
+          <div>
+            {step > 0 && (
+              <button
+                onClick={() => setStep(step - 1)}
+                className="text-sm px-4 py-2 rounded-md mr-2"
+              >
+                Back
+              </button>
+            )}
+            {step < tourSteps.length - 1 && (
+              <button
+                onClick={() => setStep(step + 1)}
+                className="text-sm bg-blue-600 text-white px-4 py-2 rounded-md"
+              >
+                Next
+              </button>
+            )}
           </div>
-          <p className="text-slate-300 mb-6">{currentStep.content}</p>
-          {currentStep.media && (
-            <div className="mb-6">
-              {currentStep.media}
-            </div>
-          )}
-          <Button onClick={handleNext} className="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700">
-            {step === steps.length - 1 ? 'Finish Tour' : 'Next'}
-          </Button>
         </div>
+        <button
+          onClick={onExit}
+          className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-200"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
+      {elementRect && (
+        <div
+          className="absolute border-4 border-blue-500 border-dashed rounded-lg transition-all duration-300"
+          style={{
+            top: `${elementRect.top - 4}px`,
+            left: `${elementRect.left - 4}px`,
+            width: `${elementRect.width + 8}px`,
+            height: `${elementRect.height + 8}px`,
+          }}
+        />
+      )}
     </div>
   );
 };

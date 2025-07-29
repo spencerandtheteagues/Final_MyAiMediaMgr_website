@@ -2,40 +2,41 @@ import os
 import sys
 from werkzeug.security import generate_password_hash
 
-# Add project root to the Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from src.main import app, db
 from src.models.user import User
 
-def create_admin():
-    """Creates the admin user."""
+def create_or_update_admin():
+    """Creates or updates the admin user."""
     with app.app_context():
-        # Check if admin user already exists
-        if User.query.filter_by(username='spencerandtheteagues').first():
-            print("Admin user already exists.")
-            return
-
-        # Create new admin user
-        admin_user = User(
-            username='spencerandtheteagues',
-            email='spencerandtheteagues@gmail.com',
-            password_hash=generate_password_hash('TheMA$TERkey$$'),
-            role='admin',
-            subscription_tier='enterprise',
-            subscription_status='active',
-            payment_method_verified=True,
-            # Set quotas to a very high number to represent 'unlimited'
-            image_quota=999999,
-            image_quota_remaining=999999,
-            video_v2_quota=999999,
-            video_v2_quota_remaining=999999,
-            video_v3_quota=999999,
-            video_v3_quota_remaining=999999
-        )
-        db.session.add(admin_user)
+        user = User.query.filter_by(username='spencerandtheteagues').first()
+        if user:
+            print("Admin user found. Updating credits...")
+            user.image_credits = 999999
+            user.image_credits_remaining = 999999
+            user.video_credits = 999999
+            user.video_credits_remaining = 999999
+            print("Admin credits updated.")
+        else:
+            print("Admin user not found. Creating...")
+            user = User(
+                username='spencerandtheteagues',
+                email='spencerandtheteagues@gmail.com',
+                password_hash=generate_password_hash('TheMA$TERkey$$'),
+                role='admin',
+                subscription_tier='enterprise',
+                subscription_status='active',
+                payment_method_verified=True,
+                image_credits=999999,
+                image_credits_remaining=999999,
+                video_credits=999999,
+                video_credits_remaining=999999
+            )
+            db.session.add(user)
+            print("Admin user created successfully.")
+        
         db.session.commit()
-        print("Admin user created successfully.")
 
 if __name__ == '__main__':
-    create_admin()
+    create_or_update_admin()

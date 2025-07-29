@@ -119,6 +119,7 @@ function Layout({ children, user, onLogout }) {
                 <Link
                   key={item.name}
                   to={item.href}
+                  data-testid={`${item.name.toLowerCase().replace(/ /g, '-')}-link`}
                   onClick={closeSidebar}
                   className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group ${
                     isActive
@@ -148,7 +149,9 @@ function Layout({ children, user, onLogout }) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">{user?.username || 'User'}</p>
-                <p className="text-xs text-slate-400">{user?.credits_remaining || 250} credits</p>
+                <p className="text-xs text-slate-400">
+                  {user?.role === 'admin' ? 'Unlimited Credits' : `${user?.image_credits_remaining || 0} Image / ${user?.video_credits_remaining || 0} Video Credits`}
+                </p>
               </div>
             </div>
           </div>
@@ -194,7 +197,9 @@ function Layout({ children, user, onLogout }) {
 
               {/* Credits Badge - Hidden on mobile */}
               <div className="hidden sm:block px-3 py-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-full">
-                <span className="text-sm font-medium text-purple-300">{user?.credits_remaining || 250} credits</span>
+                <span className="text-sm font-medium text-purple-300">
+                  {user?.role === 'admin' ? '∞ Credits' : `${user?.image_credits_remaining} 🖼️ / ${user?.video_credits_remaining} 🎥`}
+                </span>
               </div>
 
               {/* User Menu */}

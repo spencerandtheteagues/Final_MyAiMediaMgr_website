@@ -1,9 +1,21 @@
-import { useState } from 'react'
-import { Plus, Settings, BarChart3, Users, Calendar, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
+import { useState } from 'react';
+import { Plus, Settings, BarChart3, Users, Calendar, CheckCircle, AlertCircle, ExternalLink, Twitter, Instagram, Linkedin, Facebook, Youtube } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+
+const TikTokIcon = () => <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-white"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-2.43.05-4.84-.95-6.43-2.8-1.59-1.87-2.32-4.2-1.86-6.33.36-1.72 1.46-3.2 2.79-4.22 1.33-1.02 2.85-1.51 4.4-1.56v4.03c-1.11.02-2.21.33-3.15.95-.8.52-1.48 1.23-1.94 2.02-.64 1.11-.97 2.4-.9 3.68.08 1.48.51 2.93 1.3 4.16.84 1.28 2.27 2.24 3.88 2.34 1.73.09 3.42-.56 4.6-1.76 1.12-1.14 1.7-2.66 1.66-4.23-.01-2.89-.01-5.78-.01-8.67Z"/></svg>;
+
+const platformLogos = {
+  twitter: <Twitter className="w-5 h-5 text-white" />,
+  instagram: <Instagram className="w-5 h-5 text-white" />,
+  linkedin: <Linkedin className="w-5 h-5 text-white" />,
+  facebook: <Facebook className="w-5 h-5 text-white" />,
+  tiktok: <TikTokIcon />,
+  youtube: <Youtube className="w-5 h-5 text-white" />,
+};
+
 
 const platforms = [
   {
@@ -183,8 +195,8 @@ function Platforms() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 rounded-full ${platform.color} flex items-center justify-center text-white font-semibold`}>
-                        {platform.name[0]}
+                      <div className={`w-10 h-10 rounded-full ${platform.color} flex items-center justify-center`}>
+                        {platformLogos[platform.id]}
                       </div>
                       <div>
                         <CardTitle className="text-white text-lg">{platform.name}</CardTitle>
@@ -248,8 +260,8 @@ function Platforms() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 rounded-full ${platform.color} flex items-center justify-center text-white font-semibold opacity-50`}>
-                        {platform.name[0]}
+                      <div className={`w-10 h-10 rounded-full ${platform.color} flex items-center justify-center opacity-50`}>
+                        {platformLogos[platform.id]}
                       </div>
                       <div>
                         <CardTitle className="text-white text-lg">{platform.name}</CardTitle>
@@ -313,4 +325,3 @@ function Platforms() {
 }
 
 export default Platforms
-

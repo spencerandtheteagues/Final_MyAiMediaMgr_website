@@ -1,7 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
+from src.database import db
 from datetime import datetime, timedelta
-
-db = SQLAlchemy()
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -19,13 +17,11 @@ class User(db.Model):
     subscription_end_date = db.Column(db.DateTime)
     quota_reset_date = db.Column(db.DateTime, default=lambda: datetime.utcnow() + timedelta(days=30))
 
-    # Quota fields
-    image_quota = db.Column(db.Integer, default=20)
-    image_quota_remaining = db.Column(db.Integer, default=20)
-    video_v2_quota = db.Column(db.Integer, default=2)
-    video_v2_quota_remaining = db.Column(db.Integer, default=2)
-    video_v3_quota = db.Column(db.Integer, default=0)
-    video_v3_quota_remaining = db.Column(db.Integer, default=0)
+    # Quota fields - Based on new pricing model
+    image_credits = db.Column(db.Integer, default=100)
+    image_credits_remaining = db.Column(db.Integer, default=100)
+    video_credits = db.Column(db.Integer, default=0)
+    video_credits_remaining = db.Column(db.Integer, default=0)
 
     # Payment information
     stripe_customer_id = db.Column(db.String(100))
@@ -67,12 +63,10 @@ class User(db.Model):
             'subscription_start_date': self.subscription_start_date.isoformat() if self.subscription_start_date else None,
             'subscription_end_date': self.subscription_end_date.isoformat() if self.subscription_end_date else None,
             'quota_reset_date': self.quota_reset_date.isoformat() if self.quota_reset_date else None,
-            'image_quota': self.image_quota,
-            'image_quota_remaining': self.image_quota_remaining,
-            'video_v2_quota': self.video_v2_quota,
-            'video_v2_quota_remaining': self.video_v2_quota_remaining,
-            'video_v3_quota': self.video_v3_quota,
-            'video_v3_quota_remaining': self.video_v3_quota_remaining,
+            'image_credits': self.image_credits,
+            'image_credits_remaining': self.image_credits_remaining,
+            'video_credits': self.video_credits,
+            'video_credits_remaining': self.video_credits_remaining,
             'payment_method_verified': self.payment_method_verified,
             'has_access': self.has_access(),
             'is_trial_active': self.is_trial_active(),

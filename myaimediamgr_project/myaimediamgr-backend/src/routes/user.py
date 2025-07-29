@@ -7,35 +7,51 @@ user_bp = Blueprint('user', __name__)
 @user_bp.route('/auth/login', methods=['POST'])
 def login():
     """User login endpoint"""
-    data = request.json
+    data = request.get_json(force=True)
     username = data.get('username')
     password = data.get('password')  # In production, verify password hash
     
     if not username:
         return jsonify({'success': False, 'error': 'Username required'}), 400
     
-    # Find or create user for demo purposes
     user = User.query.filter_by(username=username).first()
     if not user:
-        # Create new user with trial
-        user = User(
-            username=username,
-            email=data.get('email', f"{username}@example.com"),
-            subscription_tier='trial',
-            subscription_status='trial',
-            trial_start_date=datetime.utcnow(),
-            trial_end_date=datetime.utcnow() + timedelta(days=14),
-            credits_remaining=500,
-            credits_total=500
-        )
-        db.session.add(user)
-        db.session.commit()
+        # For demo, we don't create a user on regular login
+        return jsonify({'success': False, 'error': 'User not found'}), 404
+    
+    # In a real app, you would verify the password hash here
     
     return jsonify({
         'success': True,
         'message': 'Login successful',
         'user': user.to_dict(),
-        'token': f"demo_token_{user.id}"  # In production, use JWT
+        'token': f"demo_token_{user.id}"
+    })
+
+@user_bp.route('/auth/demo-login', methods=['POST'])
+def demo_login():
+    """Creates a temporary demo user and returns login credentials."""
+    demo_username = f"demo_user_{datetime.utcnow().timestamp()}"
+    user = User(
+        username=demo_username,
+        email=f"{demo_username}@example.com",
+        role='demo',
+        subscription_tier='pro',
+        subscription_status='active',
+        image_credits=0,
+        image_credits_remaining=0,
+        video_credits=0,
+        video_credits_remaining=0
+    )
+    db.session.add(user)
+    db.session.commit()
+    
+    # Here you would pre-populate with fake data
+    
+    return jsonify({
+        'success': True,
+        'user': user.to_dict(),
+        'token': f"demo_token_{user.id}"
     })
 
 @user_bp.route('/auth/check-access', methods=['GET'])
@@ -82,9 +98,11 @@ def create_user():
         subscription_tier='trial',
         subscription_status='trial',
         trial_start_date=datetime.utcnow(),
-        trial_end_date=datetime.utcnow() + timedelta(days=14),
-        credits_remaining=500,
-        credits_total=500
+        trial_end_date=datetime.utcnow() + timedelta(days=7), # 7-day trial
+        image_credits=10,
+        image_credits_remaining=10,
+        video_credits=0,
+        video_credits_remaining=0
     )
     db.session.add(user)
     db.session.commit()
