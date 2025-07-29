@@ -1,1 +1,1 @@
-fix: Set PYTHONPATH to ensure Gunicorn finds the application module
+fix: Correct multi-stage build to include Python dependencies in final image
