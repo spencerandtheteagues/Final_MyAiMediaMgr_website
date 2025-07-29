@@ -7,7 +7,7 @@ RUN npm install --legacy-peer-deps
 RUN npm run build
 
 # Stage 2: Build Backend
-FROM python:3.11-slim AS backend-builder
+FROM python:3.11 AS backend-builder
 WORKDIR /app/backend
 COPY myaimediamgr_project/myaimediamgr-backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
