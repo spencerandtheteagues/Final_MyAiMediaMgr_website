@@ -19,6 +19,7 @@ WORKDIR /app
 COPY --from=backend-builder /app/backend/ .
 COPY --from=frontend-builder /app/myaimediamgr_project/myaimediamgr-frontend/dist ./src/static
 
-# Expose port and run the application
+ENV PYTHONPATH /app
+
 EXPOSE 8080
 CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 src.main:app

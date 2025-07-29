@@ -1,1 +1,1 @@
-fix: Configure production environment variables
+fix: Set PYTHONPATH to ensure Gunicorn finds the application module
