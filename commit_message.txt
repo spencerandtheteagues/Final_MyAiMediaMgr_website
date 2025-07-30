@@ -1,3 +1,8 @@
-revert: Revert changes to AI models and to-do list
+feat(frontend): Replace social media icons with official SVGs
 
-Reverts the changes made to the AI models in `content.py` and the to-do list in `todo.md`. These changes were made in an attempt to fix a deployment issue that is still unresolved.
+Replaces all placeholder social media icons (.png, .jpg, emojis, and lucide-react icons) with official, high-quality SVG logos. This ensures a consistent, clear, and professional look across the application.
+
+- Replaced icon files in `src/assets/social-icons/`.
+- Updated `ApprovalQueue.jsx` to use the new SVGs.
+- Updated `GenerateContent.jsx` to use the new SVGs.
+- Updated `Platforms.jsx` to use the new SVGs for consistency.

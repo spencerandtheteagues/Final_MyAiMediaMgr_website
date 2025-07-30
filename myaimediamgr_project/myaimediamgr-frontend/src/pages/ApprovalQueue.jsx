@@ -8,11 +8,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { useNavigate } from 'react-router-dom';
 
 // Import social media logos
-import xLogo from '@/assets/social-icons/x-logo.jpg';
-import facebookLogo from '@/assets/social-icons/facebook-logo.png';
-import instagramLogo from '@/assets/social-icons/instagram-logo.png';
-import linkedinLogo from '@/assets/social-icons/linkedin-logo.png';
-import tiktokLogo from '@/assets/social-icons/tiktok-logo.png';
+import facebookLogo from '@/assets/social-icons/facebook-logo.svg';
+import instagramLogo from '@/assets/social-icons/instagram-logo.svg';
+import linkedinLogo from '@/assets/social-icons/linkedin-logo.svg';
+import tiktokLogo from '@/assets/social-icons/tiktok-logo.svg';
+import xLogo from '@/assets/social-icons/x-logo.svg';
 
 const platformStyles = {
   Twitter: { name: 'X', logo: xLogo, color: 'bg-black' },

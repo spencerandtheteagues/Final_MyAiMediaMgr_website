@@ -9,14 +9,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
+import facebookLogo from '@/assets/social-icons/facebook-logo.svg';
+import instagramLogo from '@/assets/social-icons/instagram-logo.svg';
+import linkedinLogo from '@/assets/social-icons/linkedin-logo.svg';
+import tiktokLogo from '@/assets/social-icons/tiktok-logo.svg';
+import xLogo from '@/assets/social-icons/x-logo.svg';
+import youtubeLogo from '@/assets/social-icons/youtube-logo.svg';
+
+// ... (rest of the component code)
+
 const platforms = [
-  { id: 'twitter', name: 'Twitter', icon: '𝕏', color: 'bg-black' },
-  { id: 'instagram', name: 'Instagram', icon: '📷', color: 'bg-gradient-to-r from-purple-500 to-pink-500' },
-  { id: 'linkedin', name: 'LinkedIn', icon: '💼', color: 'bg-blue-600' },
-  { id: 'facebook', name: 'Facebook', icon: '📘', color: 'bg-blue-500' },
-  { id: 'tiktok', name: 'TikTok', icon: '🎵', color: 'bg-black' },
-  { id: 'youtube', name: 'YouTube', icon: '📺', color: 'bg-red-600' }
-]
+  { id: 'twitter', name: 'Twitter', icon: xLogo, color: 'bg-black' },
+  { id: 'instagram', name: 'Instagram', icon: instagramLogo, color: 'bg-gradient-to-r from-purple-500 to-pink-500' },
+  { id: 'linkedin', name: 'LinkedIn', icon: linkedinLogo, color: 'bg-blue-600' },
+  { id: 'facebook', name: 'Facebook', icon: facebookLogo, color: 'bg-blue-500' },
+  { id: 'tiktok', name: 'TikTok', icon: tiktokLogo, color: 'bg-black' },
+  { id: 'youtube', name: 'YouTube', icon: youtubeLogo, color: 'bg-red-600' }
+];
+
+// ... (in the JSX)
+<img src={platform.icon} alt={platform.name} className="w-6 h-6" />
+
 
 const contentTemplates = [
   {
