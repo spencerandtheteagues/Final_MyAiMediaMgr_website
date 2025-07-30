@@ -1,1 +1,1 @@
-fix(api): use signed urls for gcs objects
+fix(api): use iam signing for gcs signed urls
