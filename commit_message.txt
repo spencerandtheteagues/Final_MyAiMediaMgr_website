@@ -1,10 +1,12 @@
-feat(frontend): Personalize dashboard and add manual uploads
+fix(frontend): Correct syntax error in Dashboard component
 
-This commit includes several major frontend enhancements:
+This commit fixes a critical syntax error in `Dashboard.jsx` that was introduced during the icon unification process. The error prevented the frontend from building and caused the deployment to fail.
 
-- **Dashboard Personalization:** The user display name in the bottom-left of the layout now shows the capitalized username of the logged-in user instead of a generic "User".
+This commit also bundles all the recent feature enhancements:
+
+- **Dashboard Personalization:** The user display name in the bottom-left of the layout now shows the capitalized username of the logged-in user.
 - **Manual Content Creation:** Implements a new "Manual Creation" tab on the Generate Content page, allowing users to write their own posts and upload media files directly.
-- **Official SVG Icons:** Replaces all placeholder social media icons (.png, .jpg, emojis) with official, high-quality SVG logos for a consistent and professional UI.
+- **Official SVG Icons:** Replaces all placeholder social media icons with official, high-quality SVG logos for a consistent and professional UI.
 
 **Backend:**
 - Adds a new endpoint `/api/content/create-manual` to support the manual upload feature.
