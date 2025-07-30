@@ -1,4 +1,3 @@
-
 import requests
 import json
 
@@ -35,67 +34,56 @@ def login():
         print(f"Login request failed: {e}")
         return None, None
 
-def test_check_access(token, user_id):
-    """Tests the user access check endpoint."""
-    access_url = f"{BASE_URL}/api/auth/check-access?user_id={user_id}"
-    headers = {"Authorization": f"Bearer {token}"}
+def test_generate_content(token, user_id):
+    """Tests the AI content generation endpoint."""
+    generate_url = f"{BASE_URL}/api/content/generate"
+    payload = {
+        "theme": "A test prompt about space exploration.",
+        "uid": user_id,
+        "contentType": "image",
+        "platforms": ["twitter", "linkedin"],
+        "generateText": True
+    }
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}"
+    }
 
-    print("\n--- 2. Testing Access Check Endpoint ---")
+    print("\n--- 2. Testing Content Generation Endpoint ---")
     try:
-        response = requests.get(access_url, headers=headers)
+        response = requests.post(generate_url, headers=headers, data=json.dumps(payload))
         response.raise_for_status()
         data = response.json()
-        print("Access check response:", json.dumps(data, indent=2))
-        if data.get("success") and data.get("has_access"):
-            print("Access check successful.")
+        print("Content generation endpoint response:", json.dumps(data, indent=2))
+        if data.get("success") and data.get("data", {}).get("media_url"):
+            print("Content generation successful.")
             return True
         else:
-            print("Access check failed or access denied.")
+            print("Content generation failed.")
             return False
     except requests.exceptions.RequestException as e:
-        print(f"Access check request failed: {e}")
-        return False
-
-def test_user_details(token, user_id):
-    """Tests the user details endpoint."""
-    details_url = f"{BASE_URL}/api/user/details?user_id={user_id}"
-    headers = {"Authorization": f"Bearer {token}"}
-
-    print("\n--- 3. Testing User Details Endpoint ---")
-    try:
-        response = requests.get(details_url, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-        print("User details response:", json.dumps(data, indent=2))
-        if data.get("success") and "user" in data:
-            print("User details fetched successfully.")
-            return True
-        else:
-            print("Failed to fetch user details.")
-            return False
-    except requests.exceptions.RequestException as e:
-        print(f"User details request failed: {e}")
+        print(f"Content generation request failed: {e}")
+        if e.response:
+            print("Response status:", e.response.status_code)
+            print("Response body:", e.response.text)
         return False
 
 if __name__ == "__main__":
-    print("--- Starting Full Authentication Flow Verification ---")
+    print("--- Starting Content Generation Verification ---")
     auth_token, user_id = login()
 
     if auth_token and user_id:
         print(f"\nLogged in successfully. User ID: {user_id}")
         
-        access_ok = test_check_access(auth_token, user_id)
-        details_ok = test_user_details(auth_token, user_id)
+        content_ok = test_generate_content(auth_token, user_id)
 
         print("\n--- Verification Summary ---")
-        print(f"Login API Test:          PASS")
-        print(f"Access Check API Test:   {'PASS' if access_ok else 'FAIL'}")
-        print(f"User Details API Test:   {'PASS' if details_ok else 'FAIL'}")
+        print(f"Content Generation Test: {'PASS' if content_ok else 'FAIL'}")
 
-        if access_ok and details_ok:
-            print("\nAll authentication flow checks passed successfully!")
+        if content_ok:
+            print("\nContent generation test passed successfully!")
         else:
-            print("\nOne or more authentication flow checks failed.")
+            print("\nContent generation test failed.")
     else:
         print("\n--- Verification Summary ---")
         print(f"Login API Test:          FAIL")

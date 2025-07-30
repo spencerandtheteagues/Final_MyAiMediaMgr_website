@@ -1,1 +1,1 @@
-fix(api): final attempt to fix content generation
+fix(api): explicitly initialize storage client with project id
