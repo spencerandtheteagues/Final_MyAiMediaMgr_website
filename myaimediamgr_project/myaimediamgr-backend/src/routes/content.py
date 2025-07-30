@@ -19,8 +19,8 @@ def access_secret_version(project_id, secret_id, version_id="latest"):
 # --- AI Model Generation Functions ---
 
 def generate_text_content(prompt):
-    """Generates text content using Gemini 1.5 Pro."""
-    model = GenerativeModel("gemini-1.5-pro-001")
+    """Generates text content using Gemini 1.0 Pro."""
+    model = GenerativeModel("gemini-1.0-pro")
     # More specific prompt engineering
     full_prompt = f"""
     As a professional social media manager, create an engaging and concise caption for the following theme: '{prompt}'.
