@@ -2,8 +2,7 @@ from flask import Blueprint, request, jsonify
 import os
 import time
 from datetime import datetime
-from google.cloud import firestore, storage
-from src.models.user import User, Quota
+from src.models.user import User
 from src.database import db
 import vertexai
 from vertexai.generative_models import GenerativeModel
@@ -33,22 +32,18 @@ def get_user_or_404(uid):
 def check_and_decrement_quota(user, content_type):
     quota_map = {
         'image': 'image_quota',
-        'video': 'video_v2_quota',
-        'text': 'image_quota' # Text generation uses image quota
+        'video': 'video_v2_quota', # Assuming Veo maps to v2 quota
+        'text': 'image_quota'
     }
     quota_attr = quota_map.get(content_type)
     if not quota_attr:
         raise Exception("Invalid content type for quota check")
 
-    quota = Quota.query.filter_by(user_id=user.id).first()
-    if not quota:
-        raise Exception("User quota not found")
-
-    current_val = getattr(quota, quota_attr)
+    current_val = getattr(user, quota_attr)
     if current_val <= 0:
         raise Exception(f"No {content_type} credits remaining.")
     
-    setattr(quota, quota_attr, current_val - 1)
+    setattr(user, quota_attr, current_val - 1)
     return True
 
 # --- AI Model Generation Functions ---
