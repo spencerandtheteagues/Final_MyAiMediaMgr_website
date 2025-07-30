@@ -1,16 +1,5 @@
-fix(frontend): Restore AI generation tab UI
+revert(frontend): Revert GenerateContent.jsx to fix rendering error
 
-This commit fixes a critical UI bug where the "AI Generation" tab content was not rendering after the introduction of the manual upload feature. The JSX for the AI content creator was accidentally removed and has now been restored.
+This commit reverts the `GenerateContent.jsx` file to a previous stable state to fix a critical rendering error that was causing a blank white screen.
 
-This commit also bundles all recent feature enhancements:
-
-- **Dashboard Personalization:** The user display name in the bottom-left of the layout now shows the capitalized username of the logged-in user.
-- **Manual Content Creation:** Implements a new "Manual Creation" tab on the Generate Content page, allowing users to write their own posts and upload media files directly.
-- **Official SVG Icons:** Replaces all placeholder social media icons with official, high-quality SVG logos for a consistent and professional UI.
-- **Missing Dependency:** Adds the `react-dropzone` dependency to `package.json`.
-
-**Backend:**
-- Adds a new endpoint `/api/content/create-manual` to support the manual upload feature.
-- Corrects the GCS public access method to work with Uniform Bucket-Level Access.
-- Fixes a missing `firestore` import.
-- Updates to a supported, cost-effective Vertex AI model (`gemini-2.0-flash`).
+The manual upload feature, which was the source of the bug, will be re-implemented in a separate, more careful commit after the application is stable.

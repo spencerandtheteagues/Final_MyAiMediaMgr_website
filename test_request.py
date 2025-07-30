@@ -4,7 +4,7 @@ import json
 url = "https://myaimediamgr-prod-256820570287.us-central1.run.app/api/auth/login"
 headers = {"Content-Type": "application/json"}
 data = {
-    "username": "finaltestuser12",
+    "username": "finaltestuser13",
     "password": "testpassword"
 }
 
