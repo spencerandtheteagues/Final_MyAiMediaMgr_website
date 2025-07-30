@@ -1,1 +1,1 @@
-fix(db): add migration script for new quota columns
+fix(deploy): consolidate database migration and seeding into a single build step
