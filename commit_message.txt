@@ -1,1 +1,1 @@
-fix(api): implement comprehensive fix for content generation
+fix(api): final attempt to fix content generation

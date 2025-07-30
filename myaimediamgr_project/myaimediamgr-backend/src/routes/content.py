@@ -23,7 +23,7 @@ BUCKET_NAME = "final-myaimediamgr-website-media"
 vertexai.init(project=PROJECT_ID, location=LOCATION)
 firestore_db = firestore.Client(project=PROJECT_ID)
 storage_client = storage.Client()
-genai.configure()
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # --- Helper Functions ---
 def get_user_or_404(uid):
@@ -58,7 +58,7 @@ def generate_text_content(prompt):
     return response.text
 
 def generate_image_content(prompt):
-    model = ImageGenerationModel.from_pretrained("imagen-4.0-generate-preview-06-06")
+    model = ImageGenerationModel.from_pretrained("imagen-4-0-text-to-image")
     images = model.generate_images(prompt=prompt, number_of_images=1)
     
     file_name = f"generated-media/image-{int(time.time())}.png"
@@ -83,7 +83,7 @@ def generate_image_content(prompt):
 def generate_video_content(prompt):
     output_gcs_uri = f"gs://{BUCKET_NAME}/generated-media/"
     operation = genai.generate_videos(
-        model="veo-3.0-fast-generate-001", prompt=prompt, output_gcs_uri=output_gcs_uri
+        model="veo-001", prompt=prompt, output_gcs_uri=output_gcs_uri
     )
     operation.result()
 
