@@ -1,1 +1,1 @@
-fix(frontend): implement two-window preview for generated content
+feat(frontend): overhaul content generation page
