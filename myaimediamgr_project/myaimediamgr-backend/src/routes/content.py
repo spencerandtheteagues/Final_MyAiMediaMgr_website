@@ -201,7 +201,6 @@ def create_manual_content():
             blob = bucket.blob(file_name)
             
             blob.upload_from_file(media_file, content_type=media_file.content_type)
-            blob.make_public()
             
             if 'image' in media_file.content_type:
                 image_url = blob.public_url

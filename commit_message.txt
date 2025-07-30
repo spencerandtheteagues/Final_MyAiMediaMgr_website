@@ -1,5 +1,5 @@
-fix(backend): Add missing firestore import
+fix(backend): Correct GCS public access method
 
-This commit fixes a critical runtime error (`NameError: name 'firestore' is not defined`) that occurred during content generation. The `firestore` client library was being used to save posts to the database without being imported first.
+This commit fixes a runtime error (`Cannot get legacy ACL`) that occurred during manual file uploads. The error was caused by an attempt to use `blob.make_public()` on a Google Cloud Storage bucket with Uniform Bucket-Level Access enabled.
 
-This fix is bundled with all recent feature enhancements.
+The fix removes the deprecated `blob.make_public()` call. The public access is now correctly handled by granting the `Storage Object Viewer` role to `allUsers` on the bucket itself.
