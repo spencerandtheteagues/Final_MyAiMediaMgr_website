@@ -1,8 +1,3 @@
-feat(frontend): Replace social media icons with official SVGs
+fix(frontend): Unify social media icons in Dashboard
 
-Replaces all placeholder social media icons (.png, .jpg, emojis, and lucide-react icons) with official, high-quality SVG logos. This ensures a consistent, clear, and professional look across the application.
-
-- Replaced icon files in `src/assets/social-icons/`.
-- Updated `ApprovalQueue.jsx` to use the new SVGs.
-- Updated `GenerateContent.jsx` to use the new SVGs.
-- Updated `Platforms.jsx` to use the new SVGs for consistency.
+Updates the Dashboard component to use the new, consistent SVG social media icons, replacing the placeholder text avatars. This ensures all brand logos are consistent across the application.
