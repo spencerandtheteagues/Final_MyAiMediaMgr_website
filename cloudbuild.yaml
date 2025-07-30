@@ -7,14 +7,6 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest']
 
-  # Initialize the database: apply migrations and seed admin user
-  - name: 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest'
-    entrypoint: 'python'
-    dir: '/app'
-    args: ['-m', 'src.init_db']
-    env:
-      - 'FLASK_APP=src/main.py'
-
   # Deploy container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud

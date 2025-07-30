@@ -19,9 +19,14 @@ WORKDIR /app
 COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=backend-builder /usr/local/bin /usr/local/bin
 COPY --from=backend-builder /app/backend/ .
+COPY myaimediamgr_project/myaimediamgr-backend/entrypoint.sh .
+RUN chmod +x /app/entrypoint.sh
+
+# Copy frontend build
 COPY --from=frontend-builder /app/myaimediamgr_project/myaimediamgr-frontend/dist ./src/static
 
 ENV PYTHONPATH /app
 
 EXPOSE 8080
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 src.main:app
+ENTRYPOINT ["/app/entrypoint.sh"]
+
