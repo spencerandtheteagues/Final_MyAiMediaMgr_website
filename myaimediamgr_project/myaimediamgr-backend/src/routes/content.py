@@ -60,15 +60,15 @@ def check_and_decrement_quota(user, content_type):
 # --- AI Model Generation Functions ---
 
 def generate_text_content(prompt):
-    """Generates text content using Gemini 1.5 Flash."""
-    model = GenerativeModel("gemini-1.5-flash-001")
+    """Generates text content using Gemini 2.5 Flash."""
+    model = GenerativeModel("gemini-2.5-flash")
     full_prompt = f"As a professional social media manager, create an engaging and concise caption for the following theme: '{prompt}'. The caption should include 2-3 relevant hashtags and be ready to publish."
     response = model.generate_content(full_prompt)
     return response.text
 
 def generate_image_content(prompt):
     """Generates an image using Imagen, uploads to GCS, and returns a public URL."""
-    model = ImageGenerationModel.from_pretrained("imagegeneration@006")
+    model = ImageGenerationModel.from_pretrained("imagen-4.0-generate-preview-06-06")
     images = model.generate_images(prompt=prompt, number_of_images=1)
     
     file_name = f"generated-media/image-{int(time.time())}.png"
@@ -86,7 +86,7 @@ def generate_video_content(prompt):
     output_gcs_uri = f"gs://{BUCKET_NAME}/generated-media/"
     
     operation = genai.generate_videos(
-        model="models/veo-3-fast-generate-001", # Using the fast model for shorter clips
+        model="veo-3.0-fast-generate-001", # Using the fast model for shorter clips
         prompt=prompt,
         output_gcs_uri=output_gcs_uri
     )

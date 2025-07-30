@@ -1,1 +1,1 @@
-fix(api): use transaction for quota check to prevent race conditions
+feat(api): update to latest gemini, imagen, and veo models
