@@ -1,1 +1,1 @@
-refactor: remove debugging logs from user routes
+chore: remove temporary build file

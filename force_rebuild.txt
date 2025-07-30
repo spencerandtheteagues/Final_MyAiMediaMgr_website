@@ -1,1 +1,0 @@
-This file is used to force a rebuild of the Docker image.
