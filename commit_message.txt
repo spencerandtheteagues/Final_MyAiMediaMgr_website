@@ -1,6 +1,6 @@
-fix(frontend): Correct syntax error in Dashboard component
+fix(frontend): Add missing react-dropzone dependency
 
-This commit fixes a critical syntax error in `Dashboard.jsx` that was introduced during the icon unification process. The error prevented the frontend from building and caused the deployment to fail.
+This commit fixes a critical build failure caused by a missing `react-dropzone` dependency. The library was used to implement the manual file upload feature, but was not added to the project's `package.json`.
 
 This commit also bundles all the recent feature enhancements:
 
