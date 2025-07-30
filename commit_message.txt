@@ -1,1 +1,1 @@
-fix(api): adapt to new imagen 4 response format
+fix(api): use correct attribute to access imagen 4 image bytes
