@@ -148,7 +148,9 @@ function Layout({ children, user, onLogout }) {
                 <User className="w-4 h-4 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{user?.username || 'User'}</p>
+                <p className="text-sm font-medium text-white truncate">
+                  {user?.username ? user.username.charAt(0).toUpperCase() + user.username.slice(1) : 'User'}
+                </p>
                 <p className="text-xs text-slate-400">
                   {user?.role === 'admin' ? 'Unlimited Credits' : `${user?.image_credits_remaining || 0} Image / ${user?.video_credits_remaining || 0} Video Credits`}
                 </p>

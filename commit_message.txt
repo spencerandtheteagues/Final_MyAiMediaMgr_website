@@ -1,17 +1,10 @@
-feat: Implement manual content creation feature
+feat(frontend): Personalize dashboard and add manual uploads
 
-This commit introduces a major new feature allowing users to create content manually in addition to using the AI generator.
+This commit includes several major frontend enhancements:
 
-**Frontend:**
-- Adds "AI Generation" and "Manual Creation" tabs to the `GenerateContent.jsx` page.
-- The "Manual Creation" tab includes a text area for post content and a drag-and-drop file uploader for images and videos with a preview.
-- Implements the client-side logic to submit the manual post data to the new backend endpoint.
+- **Dashboard Personalization:** The user display name in the bottom-left of the layout now shows the capitalized username of the logged-in user instead of a generic "User".
+- **Manual Content Creation:** Implements a new "Manual Creation" tab on the Generate Content page, allowing users to write their own posts and upload media files directly.
+- **Official SVG Icons:** Replaces all placeholder social media icons (.png, .jpg, emojis) with official, high-quality SVG logos for a consistent and professional UI.
 
 **Backend:**
-- Adds a new endpoint `/api/content/create-manual` to `content.py`.
-- This endpoint handles multipart/form-data to accept text and an optional media file.
-- Uploads the media file to Google Cloud Storage.
-- Saves the complete post (text, media URL, etc.) to Firestore.
-- Decrements user credits for manual posts.
-
-This provides users with the flexibility to create content in the way that best suits their workflow.
+- Adds a new endpoint `/api/content/create-manual` to support the manual upload feature.
