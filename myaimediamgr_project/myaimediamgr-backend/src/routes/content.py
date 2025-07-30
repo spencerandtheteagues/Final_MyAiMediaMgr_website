@@ -107,7 +107,7 @@ def generate_video_content(prompt):
 
 # --- API Endpoints ---
 
-@content_bp.route('/api/content/generate', methods=['POST'])
+@content_bp.route('/content/generate', methods=['POST'])
 def generate_content_route():
     try:
         data = request.get_json()
@@ -151,7 +151,7 @@ def generate_content_route():
         print(f"Error in content generation: {e}")
         return jsonify({'success': False, 'error': f'Failed to generate content: {str(e)}'}), 500
 
-@content_bp.route('/api/content/manual_post', methods=['POST'])
+@content_bp.route('/content/manual_post', methods=['POST'])
 def manual_post_route():
     try:
         uid = request.form.get('uid')
@@ -193,7 +193,7 @@ def manual_post_route():
         print(f"Error in manual post: {e}")
         return jsonify({'success': False, 'error': f'Failed to create manual post: {str(e)}'}), 500
 
-@content_bp.route('/api/content/pending', methods=['GET'])
+@content_bp.route('/content/pending', methods=['GET'])
 def get_pending_posts():
     """Fetches all posts with 'pending' status from Firestore."""
     try:

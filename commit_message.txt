@@ -1,1 +1,1 @@
-chore: remove temporary auth test file
+fix(api): correct duplicate api prefix in content routes
