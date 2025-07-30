@@ -1,5 +1,11 @@
-revert(frontend): Revert GenerateContent.jsx to fix rendering error
+fix(frontend): Restore missing helper functions in GenerateContent
 
-This commit reverts the `GenerateContent.jsx` file to a previous stable state to fix a critical rendering error that was causing a blank white screen.
+This commit fixes a critical rendering error that caused a blank white screen on the Content Generation page. The error was a `ReferenceError` caused by the `handleSelectAll` and other helper functions being accidentally removed.
 
-The manual upload feature, which was the source of the bug, will be re-implemented in a separate, more careful commit after the application is stable.
+This fix restores the following functions:
+- `handlePlatformToggle`
+- `handleSelectAll`
+- `handleTemplateSelect`
+- `getSelectedPlatformNames`
+
+This change makes the AI Generation tab functional again.

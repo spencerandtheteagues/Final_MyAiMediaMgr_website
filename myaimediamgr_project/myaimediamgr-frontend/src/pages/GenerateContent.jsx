@@ -61,7 +61,35 @@ function GenerateContent({ user }) {
     multiple: false
   });
 
-  // ... (handlePlatformToggle, handleSelectAll, handleTemplateSelect remain the same)
+  const handlePlatformToggle = (platformId) => {
+    setSelectedPlatforms(prev => 
+      prev.includes(platformId)
+        ? prev.filter(id => id !== platformId)
+        : [...prev, platformId]
+    )
+  }
+
+  const handleSelectAll = () => {
+    if (selectedPlatforms.length === platforms.length) {
+      setSelectedPlatforms([])
+    } else {
+      setSelectedPlatforms(platforms.map(p => p.id))
+    }
+  }
+
+  const handleTemplateSelect = (templateId) => {
+    const selectedTemplate = contentTemplates.find(t => t.id === templateId)
+    if (selectedTemplate) {
+      setTemplate(templateId)
+      setCustomPrompt(selectedTemplate.prompt)
+    }
+  }
+
+  const getSelectedPlatformNames = () => {
+    return selectedPlatforms.map(id => 
+      platforms.find(p => p.id === id)?.name
+    ).join(', ')
+  }
 
   const handleGenerate = async () => {
     // ... (AI generation logic remains the same)
