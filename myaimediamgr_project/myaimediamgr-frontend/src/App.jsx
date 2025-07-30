@@ -31,24 +31,36 @@ function App() {
 
   const checkUserAccess = async (userId) => {
     try {
-      const response = await fetch(`/api/auth/check-access?user_id=${userId}`)
-      const data = await response.json()
+      // First, check for basic access rights
+      const accessResponse = await fetch(`/api/auth/check-access?user_id=${userId}`);
+      const accessData = await accessResponse.json();
       
-      if (data.success) {
-        setHasAccess(data.has_access)
-        setUser(data)
-        setIsAuthenticated(true)
+      if (accessData.success && accessData.has_access) {
+        // If access is granted, fetch the full user details
+        const userResponse = await fetch(`/api/user/details?user_id=${userId}`);
+        const userData = await userResponse.json();
+
+        if (userData.success) {
+          setHasAccess(true);
+          setUser(userData.user); // Set the full user object
+          setIsAuthenticated(true);
+        } else {
+          throw new Error(userData.error || "Failed to fetch user details.");
+        }
       } else {
-        // Clear invalid auth
-        localStorage.removeItem('authToken')
-        localStorage.removeItem('userId')
+        // If access check fails, treat as logged out
+        setHasAccess(false);
+        setIsAuthenticated(true); // Still authenticated, but no access
+        setUser({ id: userId }); // Keep a minimal user object for the subscription page
       }
     } catch (error) {
-      console.error('Access check failed:', error)
-      localStorage.removeItem('authToken')
-      localStorage.removeItem('userId')
+      console.error('Access or user fetch failed:', error);
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userId');
+      setIsAuthenticated(false);
+      setUser(null);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 

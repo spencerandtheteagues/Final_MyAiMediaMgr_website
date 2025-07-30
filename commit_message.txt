@@ -1,2 +1,2 @@
-feat(debug): add extensive logging to content generation
-fix(ui): enlarge tiktok and youtube logos
+fix(app): ensure full user object is fetched on load
+feat(backend): add endpoint to fetch full user details

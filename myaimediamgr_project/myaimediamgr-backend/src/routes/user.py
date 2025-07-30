@@ -84,6 +84,19 @@ def check_access():
     
     return jsonify(response_data)
 
+@user_bp.route('/api/user/details', methods=['GET'])
+def get_user_details():
+    """Fetches the full user object."""
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({'success': False, 'error': 'User ID is required'}), 400
+    
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'success': False, 'error': 'User not found'}), 404
+        
+    return jsonify({'success': True, 'user': user.to_dict()})
+
 @user_bp.route('/users', methods=['GET'])
 def get_users():
     users = User.query.all()
