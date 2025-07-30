@@ -84,7 +84,7 @@ def check_access():
     
     return jsonify(response_data)
 
-@user_bp.route('/api/user/details', methods=['GET'])
+@user_bp.route('/user/details', methods=['GET'])
 def get_user_details():
     """Fetches the full user object."""
     user_id = request.args.get('user_id')
