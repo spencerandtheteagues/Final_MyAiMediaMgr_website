@@ -238,7 +238,7 @@ function GenerateContent({ user }) {
         {/* Media Preview */}
         <Card className={cn(
           "bg-slate-800/30 border-slate-700/50 backdrop-blur-sm flex-grow flex flex-col",
-          creationMode === 'manual' && "max-h-[300px]"
+          creationMode === 'manual' && "max-h-[250px]" // Constrain height in manual mode
         )}>
           <CardHeader>
             <CardTitle className="text-white flex items-center">

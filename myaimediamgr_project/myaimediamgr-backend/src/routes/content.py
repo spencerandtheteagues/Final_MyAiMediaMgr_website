@@ -8,7 +8,7 @@ from src.database import db
 import vertexai
 from vertexai.generative_models import GenerativeModel
 from vertexai.vision_models import ImageGenerationModel
-from google.generativeai import client as genai_client
+import google.generativeai as genai
 
 content_bp = Blueprint('content', __name__)
 
@@ -21,7 +21,7 @@ BUCKET_NAME = "final-myaimediamgr-website-media"
 vertexai.init(project=PROJECT_ID, location=LOCATION)
 firestore_db = firestore.Client(project=PROJECT_ID)
 storage_client = storage.Client(project=PROJECT_ID)
-genai_client_instance = genai_client.Client()
+genai.configure(project=PROJECT_ID)
 
 # --- Helper Functions ---
 def get_user_or_404(uid):
@@ -78,8 +78,8 @@ def generate_video_content(prompt):
     """Generates a short video using Veo Fast, polls for completion, and returns a public URL."""
     output_gcs_uri = f"gs://{BUCKET_NAME}/generated-media/"
     
-    operation = genai_client_instance.models.generate_videos(
-        model="veo-3.0-fast-generate-001", # Using the fast model for shorter clips
+    operation = genai.generate_videos(
+        model="models/veo-3-fast-generate-001", # Using the fast model for shorter clips
         prompt=prompt,
         output_gcs_uri=output_gcs_uri
     )
@@ -89,7 +89,7 @@ def generate_video_content(prompt):
     # Poll for completion
     while not operation.done:
         time.sleep(10) # Poll every 10 seconds
-        operation = genai_client_instance.operations.get(operation.operation.name)
+        operation = genai.get_operation(operation.operation.name)
         print(f"Polling video generation status: {operation.metadata.state.name}")
 
     if operation.error:

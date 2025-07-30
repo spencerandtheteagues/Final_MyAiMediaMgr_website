@@ -1,1 +1,1 @@
-fix(backend): resolve critical import error for firestore
+fix(app): correct genai client initialization and fix UI overlap
