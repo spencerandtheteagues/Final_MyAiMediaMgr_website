@@ -1,11 +1,10 @@
 import requests
 import json
 
-url = "https://myaimediamgr-prod-256820570287.us-central1.run.app/api/users"
+url = "https://myaimediamgr-prod-256820570287.us-central1.run.app/api/auth/login"
 headers = {"Content-Type": "application/json"}
 data = {
-    "username": "finaltestuser11",
-    "email": "finaltest11@example.com",
+    "username": "finaltestuser12",
     "password": "testpassword"
 }
 
