@@ -45,6 +45,7 @@ def check_and_decrement_quota(user, content_type):
         raise Exception(f"No {content_type} credits remaining.")
     
     setattr(user, quota_attr, current_val - 1)
+    db.session.commit()
     return True
 
 # --- AI Model Generation Functions ---
