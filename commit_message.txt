@@ -1,11 +1,1 @@
-fix(frontend): Implement two-window preview for generated content
-
-This commit fixes a critical bug that caused a blank white screen when generating image or video content. The UI was not designed to handle media responses, causing the component to crash.
-
-This fix implements a new two-window preview layout on the "Generate Content" page:
-- The existing "Generated Content" card has been renamed to "Generated Text".
-- A new "Generated Image/Video" card has been added to display the visual content.
-- The `handleGenerate` function has been updated to correctly parse the backend response and populate both the text and media preview areas.
-- The "Credits Remaining" box has been removed from this view to make space for the new media preview.
-
-This resolves the rendering crash and provides a much better user experience for all content types.
+feat: implement two-pane layout for content generation
