@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 import os
 import time
 from datetime import datetime
+from google.cloud import firestore, storage
 from src.models.user import User
 from src.database import db
 import vertexai
