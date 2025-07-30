@@ -175,9 +175,11 @@ def create_manual_content():
     try:
         uid = request.form.get('uid')
         text_content = request.form.get('text')
-        
-        if not uid or not text_content:
-            return jsonify({'error': 'User ID and text content are required'}), 400
+        platforms = request.form.getlist('platforms')
+        print(f"Received platforms: {platforms}")
+
+        if not uid or not text_content or not platforms:
+            return jsonify({'error': 'User ID, text content, and platforms are required'}), 400
 
         user = User.query.get(uid)
         if not user:

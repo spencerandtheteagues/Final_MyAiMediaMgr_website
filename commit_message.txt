@@ -1,5 +1,16 @@
-fix(backend): Correct GCS public access method
+fix(frontend): Restore AI generation tab UI
 
-This commit fixes a runtime error (`Cannot get legacy ACL`) that occurred during manual file uploads. The error was caused by an attempt to use `blob.make_public()` on a Google Cloud Storage bucket with Uniform Bucket-Level Access enabled.
+This commit fixes a critical UI bug where the "AI Generation" tab content was not rendering after the introduction of the manual upload feature. The JSX for the AI content creator was accidentally removed and has now been restored.
 
-The fix removes the deprecated `blob.make_public()` call. The public access is now correctly handled by granting the `Storage Object Viewer` role to `allUsers` on the bucket itself.
+This commit also bundles all recent feature enhancements:
+
+- **Dashboard Personalization:** The user display name in the bottom-left of the layout now shows the capitalized username of the logged-in user.
+- **Manual Content Creation:** Implements a new "Manual Creation" tab on the Generate Content page, allowing users to write their own posts and upload media files directly.
+- **Official SVG Icons:** Replaces all placeholder social media icons with official, high-quality SVG logos for a consistent and professional UI.
+- **Missing Dependency:** Adds the `react-dropzone` dependency to `package.json`.
+
+**Backend:**
+- Adds a new endpoint `/api/content/create-manual` to support the manual upload feature.
+- Corrects the GCS public access method to work with Uniform Bucket-Level Access.
+- Fixes a missing `firestore` import.
+- Updates to a supported, cost-effective Vertex AI model (`gemini-2.0-flash`).

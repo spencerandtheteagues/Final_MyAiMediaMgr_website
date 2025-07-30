@@ -1,15 +1,12 @@
 import requests
 import json
 
-url = "https://myaimediamgr-prod-256820570287.us-central1.run.app/api/content/generate"
-headers = {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer demo_token_2"
-}
+url = "https://myaimediamgr-prod-256820570287.us-central1.run.app/api/users"
+headers = {"Content-Type": "application/json"}
 data = {
-    "theme": "a new coffee shop that also sells vintage records",
-    "uid": 2,
-    "contentType": "text"
+    "username": "finaltestuser11",
+    "email": "finaltest11@example.com",
+    "password": "testpassword"
 }
 
 response = requests.post(url, headers=headers, data=json.dumps(data))

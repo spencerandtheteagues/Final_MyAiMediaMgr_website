@@ -125,17 +125,283 @@ function GenerateContent({ user }) {
         </TabsList>
         
         <TabsContent value="ai">
-          {/* AI Generation UI (existing code) */}
           <div className="grid lg:grid-cols-2 gap-8 pt-6">
             {/* Content Creation Form */}
             <div className="space-y-6">
               <Card className="bg-slate-800/30 border-slate-700/50 backdrop-blur-sm">
-                {/* ... (rest of the AI form is the same as before) ... */}
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Sparkles className="w-5 h-5 mr-2 text-purple-400" />
+                    Content Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Platform Selection */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-white">Select Platforms *</Label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <HelpCircle className="w-4 h-4 text-slate-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Choose which platforms to generate content for. Each platform costs 1 credit.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm text-slate-400">
+                        {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''} selected
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSelectAll}
+                        className="border-slate-700/50 text-slate-300 hover:text-white"
+                      >
+                        {selectedPlatforms.length === platforms.length ? 'Deselect All' : 'Select All'}
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      {platforms.map((platform) => (
+                        <div
+                          key={platform.id}
+                          onClick={() => handlePlatformToggle(platform.id)}
+                          className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 ${
+                            selectedPlatforms.includes(platform.id)
+                              ? 'border-purple-500 bg-purple-500/10'
+                              : 'border-slate-700/50 hover:border-slate-600/50'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-8 h-8 rounded-lg ${platform.color} flex items-center justify-center text-white text-sm`}>
+                              <img src={platform.icon} alt={platform.name} className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <div className="text-white font-medium">{platform.name}</div>
+                              <div className="text-xs text-slate-400">1 credit</div>
+                            </div>
+                            <div className="ml-auto">
+                              <div className={`w-4 h-4 rounded border-2 ${
+                                selectedPlatforms.includes(platform.id)
+                                  ? 'bg-purple-500 border-purple-500'
+                                  : 'border-slate-600'
+                              }`}>
+                                {selectedPlatforms.includes(platform.id) && (
+                                  <Check className="w-3 h-3 text-white" />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Content Type */}
+                  <div className="space-y-2">
+                    <Label className="text-white">Content Type</Label>
+                    <Select value={contentType} onValueChange={setContentType}>
+                      <SelectTrigger className="bg-slate-700/50 border-slate-600/50 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="text">
+                          <div className="flex items-center space-x-2">
+                            <Type className="w-4 h-4" />
+                            <span>Text Only</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="image">
+                          <div className="flex items-center space-x-2">
+                            <Image className="w-4 h-4" />
+                            <span>Image + Text</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="video">
+                          <div className="flex items-center space-x-2">
+                            <Video className="w-4 h-4" />
+                            <span>Video + Text</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Template Selection */}
+                  <div className="space-y-2">
+                    <Label className="text-white">Content Template (Optional)</Label>
+                    <Select value={template} onValueChange={handleTemplateSelect}>
+                      <SelectTrigger className="bg-slate-700/50 border-slate-600/50 text-white">
+                        <SelectValue placeholder="Choose a template or write custom prompt" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {contentTemplates.map((template) => (
+                          <SelectItem key={template.id} value={template.id}>
+                            <div>
+                              <div className="font-medium">{template.name}</div>
+                              <div className="text-xs text-slate-400">{template.description}</div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Custom Prompt */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-white">Content Prompt *</Label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <HelpCircle className="w-4 h-4 text-slate-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Describe what content you want to generate. Be specific for better results.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <Textarea
+                      placeholder="Describe the content you want to generate..."
+                      value={customPrompt}
+                      onChange={(e) => setCustomPrompt(e.target.value)}
+                      className="bg-slate-700/50 border-slate-600/50 text-white min-h-32"
+                    />
+                  </div>
+
+                  {/* Generate Button */}
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={loading || !customPrompt.trim() || selectedPlatforms.length === 0}
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Generating...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <Sparkles className="w-4 h-4" />
+                        <span>Generate Content ({selectedPlatforms.length} credit{selectedPlatforms.length !== 1 ? 's' : ''})</span>
+                      </div>
+                    )}
+                  </Button>
+
+                  {selectedPlatforms.length > 0 && (
+                    <div className="text-sm text-slate-400 text-center">
+                      Will generate content for: {getSelectedPlatformNames()}
+                    </div>
+                  )}
+                </CardContent>
               </Card>
             </div>
             {/* Generated Content Preview */}
             <div className="space-y-6">
-              {/* ... (rest of the AI preview is the same as before) ... */}
+              <Card className="bg-slate-800/30 border-slate-700/50 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Send className="w-5 h-5 mr-2 text-green-400" />
+                      Generated Content
+                    </div>
+                    {generatedContent && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCopy}
+                        className="border-slate-700/50 text-slate-300 hover:text-white"
+                      >
+                        {copied ? (
+                          <Check className="w-4 h-4 mr-2" />
+                        ) : (
+                          <Copy className="w-4 h-4 mr-2" />
+                        )}
+                        {copied ? 'Copied!' : 'Copy'}
+                      </Button>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {generatedContent ? (
+                    <div className="space-y-4">
+                      <div className="bg-slate-700/30 rounded-lg p-4">
+                        <pre className="text-slate-300 whitespace-pre-wrap font-sans text-sm leading-relaxed">
+                          {generatedContent}
+                        </pre>
+                      </div>
+                      
+                      <div className="flex items-center justify-between pt-4 border-t border-slate-700/50">
+                        <div className="text-sm text-slate-400">
+                          Ready to post to {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''}
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-slate-700/50 text-slate-300 hover:text-white"
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                          >
+                            Post to All
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Sparkles className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+                      <p className="text-slate-400">
+                        Generated content will appear here
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Credits Info */}
+              {user && (
+                <Card className="bg-slate-800/30 border-slate-700/50 backdrop-blur-sm">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-white font-medium">Credits Remaining</div>
+                        <div className="text-sm text-slate-400">
+                          {user.subscription_tier || 'trial'} plan
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-white">
+                          {user.credits_remaining || 0}
+                        </div>
+                        <div className="text-sm text-slate-400">
+                          of {user.credits_total || 0}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <div className="w-full bg-slate-700/50 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-purple-500 to-blue-600 h-2 rounded-full transition-all duration-300"
+                          style={{ 
+                            width: `${Math.max(0, Math.min(100, ((user.credits_remaining || 0) / (user.credits_total || 1)) * 100))}%` 
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </TabsContent>
