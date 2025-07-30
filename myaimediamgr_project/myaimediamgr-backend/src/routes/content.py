@@ -9,6 +9,7 @@ import vertexai
 from vertexai.generative_models import GenerativeModel
 from vertexai.vision_models import ImageGenerationModel
 import google.generativeai as genai
+import datetime
 
 content_bp = Blueprint('content', __name__)
 
@@ -66,8 +67,10 @@ def generate_text_content(prompt):
     response = model.generate_content(full_prompt)
     return response.text
 
+import datetime
+
 def generate_image_content(prompt):
-    """Generates an image using Imagen, uploads to GCS, and returns a public URL."""
+    """Generates an image using Imagen, uploads to GCS, and returns a signed URL."""
     model = ImageGenerationModel.from_pretrained("imagen-4.0-generate-preview-06-06")
     images = model.generate_images(prompt=prompt, number_of_images=1)
     
@@ -79,8 +82,13 @@ def generate_image_content(prompt):
     image_bytes = images[0]._image_bytes
     blob.upload_from_string(image_bytes, content_type='image/png')
     
-    blob.make_public()
-    return blob.public_url
+    # Generate a signed URL for the blob, valid for 15 minutes
+    signed_url = blob.generate_signed_url(
+        version="v4",
+        expiration=datetime.timedelta(minutes=15),
+        method="GET",
+    )
+    return signed_url
 
 def generate_video_content(prompt):
     """Generates a short video using Veo Fast, polls for completion, and returns a public URL."""
@@ -179,8 +187,13 @@ def manual_post_route():
         
         blob = storage_client.bucket(BUCKET_NAME).blob(file_name)
         blob.upload_from_file(media_file, content_type=media_file.content_type)
-        blob.make_public()
-        media_url = blob.public_url
+        
+        # Generate a signed URL for the blob, valid for 15 minutes
+        media_url = blob.generate_signed_url(
+            version="v4",
+            expiration=datetime.timedelta(minutes=15),
+            method="GET",
+        )
         
         # Create post object in Firestore
         post_data = {

@@ -1,1 +1,1 @@
-fix(api): use correct attribute to access imagen 4 image bytes
+fix(api): use signed urls for gcs objects
