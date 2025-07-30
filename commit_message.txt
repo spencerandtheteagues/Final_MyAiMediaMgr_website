@@ -1,1 +1,1 @@
-fix(backend): correct genai configuration argument
+fix(db): add migration script for new quota columns
