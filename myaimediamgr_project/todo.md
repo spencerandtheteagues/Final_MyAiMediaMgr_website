@@ -26,8 +26,8 @@
 
 ### API Endpoints
 - [x] Create authentication endpoints
-- [x] Implement content generation endpoints
-- [x] Integrate with Gemini AI API
+- [ ] Implement content generation endpoints - NEEDS REVISIT
+- [ ] Integrate with Gemini AI API - NEEDS REVISIT
 - [x] Add user management endpoints
 - [x] Create approval workflow endpoints
 - [ ] Implement Veo video generation in `content.py`
@@ -39,7 +39,7 @@
 
 ### Testing Tasks
 - [x] Test authentication flow
-- [x] Test AI content generation
+- [ ] Test AI content generation - NEEDS REVISIT
 - [x] Verify responsive design on different screen sizes
 - [x] Test all API endpoints
 - [x] Verify error handling
