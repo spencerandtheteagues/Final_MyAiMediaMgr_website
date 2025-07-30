@@ -3,6 +3,7 @@ import requests
 import os
 from datetime import datetime
 from google.cloud import secretmanager
+from google.cloud import firestore
 from src.models.user import User
 from src.database import db
 import vertexai

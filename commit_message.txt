@@ -1,12 +1,5 @@
-feat(backend): Implement cost-saving models and financial guardrails
+fix(backend): Add missing firestore import
 
-This commit implements critical changes based on a detailed financial analysis to ensure the application's profitability and fix the persistent content generation failures.
+This commit fixes a critical runtime error (`NameError: name 'firestore' is not defined`) that occurred during content generation. The `firestore` client library was being used to save posts to the database without being imported first.
 
-**Core Fixes:**
-- **Text Generation:** The AI model has been updated from the retired `gemini-1.0-pro` to the currently supported and cost-effective `gemini-2.0-flash`. This resolves the `404 Publisher Model not found` error.
-- **Video Generation:** The conceptual video generation logic has been updated to specify the use of "Veo 3 Fast (video-only)" as the default, aligning with the cost-optimization strategy.
-
-**Documentation:**
-- The `todo.md` has been updated to include future financial guardrail features, such as in-product credit top-ups and using cheaper "Fast" models for image previews.
-
-This commit bundles all recent feature work, including the manual upload feature, icon unification, and dashboard personalization.
+This fix is bundled with all recent feature enhancements.
