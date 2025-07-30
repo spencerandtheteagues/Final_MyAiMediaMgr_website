@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from src.models.user import User, db
 from datetime import datetime, timedelta
+import logging
 
 user_bp = Blueprint('user', __name__)
 
@@ -84,18 +85,34 @@ def check_access():
     
     return jsonify(response_data)
 
+import logging
+
 @user_bp.route('/user/details', methods=['GET'])
 def get_user_details():
     """Fetches the full user object."""
+    logging.info("--- GET_USER_DETAILS ---")
     user_id = request.args.get('user_id')
     if not user_id:
+        logging.error("User ID not provided")
         return jsonify({'success': False, 'error': 'User ID is required'}), 400
     
+    logging.info(f"Fetching user with ID: {user_id}")
     user = User.query.get(user_id)
     if not user:
+        logging.error(f"User with ID {user_id} not found")
         return jsonify({'success': False, 'error': 'User not found'}), 404
         
-    return jsonify({'success': True, 'user': user.to_dict()})
+    logging.info(f"User found: {user}")
+    
+    try:
+        user_dict = user.to_dict()
+        logging.info(f"User dictionary: {user_dict}")
+        response = jsonify({'success': True, 'user': user_dict})
+        logging.info(f"Response: {response.get_data(as_text=True)}")
+        return response
+    except Exception as e:
+        logging.error(f"Error converting user to dict or creating response: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Internal server error during user serialization'}), 500
 
 @user_bp.route('/users', methods=['GET'])
 def get_users():
