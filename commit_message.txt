@@ -1,1 +1,1 @@
-chore: Trigger redeployment to apply latest changes
+fix(frontend): implement two-window preview for generated content
