@@ -1,3 +1,4 @@
+// Triggering redeployment
 import { useState, useCallback } from 'react'
 import { Sparkles, Send, Image, Video, Type, Copy, Check, HelpCircle, UploadCloud, FileText, Bot, User } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'

@@ -1,6 +1,1 @@
-fix: Repair AI content generation and update preview UI
-
-- Implemented a two-pane preview for AI-generated content, with separate cards for text and media (image/video).
-- Removed the "Credits Remaining" card to provide more space for the media preview.
-- Replaced the mocked API call in `handleGenerate` with a real `fetch` call to the `/api/content/generate` endpoint.
-- Ensured the component state is correctly updated from the API response, fixing the bug that caused a blank screen when generating media content.
+chore: Trigger redeployment to apply latest changes
