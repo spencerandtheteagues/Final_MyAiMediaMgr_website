@@ -33,6 +33,10 @@
 - [ ] Implement Veo video generation in `content.py`
 - [ ] Add manual text and media upload to content creation
 
+### Financial Guardrails & Optimizations
+- [ ] Implement in-product top-ups for credits
+- [ ] Use Imagen 4 Fast for image previews/drafts to save costs
+
 ### Billing and Subscriptions
 - [ ] Implement the full Stripe checkout flow on user signup
 

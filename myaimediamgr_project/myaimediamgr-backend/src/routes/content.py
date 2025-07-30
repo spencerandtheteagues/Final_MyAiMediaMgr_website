@@ -19,8 +19,8 @@ def access_secret_version(project_id, secret_id, version_id="latest"):
 # --- AI Model Generation Functions ---
 
 def generate_text_content(prompt):
-    """Generates text content using Gemini 1.0 Pro."""
-    model = GenerativeModel("gemini-1.0-pro")
+    """Generates text content using Gemini 2.0 Flash."""
+    model = GenerativeModel("gemini-2.0-flash")
     # More specific prompt engineering
     full_prompt = f"""
     As a professional social media manager, create an engaging and concise caption for the following theme: '{prompt}'.
@@ -63,10 +63,10 @@ def generate_image_content(prompt):
     return blob.public_url, images[0]
 
 def generate_video_content(prompt):
-    """Generates a video using Veo (conceptual)."""
+    """Generates a video using Veo 3 Fast (video-only) (conceptual)."""
     # Veo integration is conceptual as the API may vary.
     # This is a placeholder for the actual implementation.
-    print(f"Conceptual video generation for prompt: {prompt}")
+    print(f"Conceptual video generation for prompt (Veo 3 Fast, video-only): {prompt}")
     video_url = f"https://storage.googleapis.com/your-bucket-name/video-{datetime.utcnow().timestamp()}.mp4"
     return video_url, None
 
