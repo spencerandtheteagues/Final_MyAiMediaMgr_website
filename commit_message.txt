@@ -1,1 +1,9 @@
-Doc: Trigger build after adding Artifact Registry permissions
+feat: Implement new pricing model, AI integrations, and demo account
+
+This commit introduces a major feature overhaul, including:
+- A new tiered pricing model with credit-based quotas for image and video generation.
+- Integration with Gemini 1.5 Pro for text, Imagen for images, and a placeholder for Veo for video.
+- A secure demo account with a guided tour.
+- Numerous UI enhancements and bug fixes.
+- Automated database migrations and seeding via Cloud Build.
+- Deletion of old, unused backend and frontend directories.
