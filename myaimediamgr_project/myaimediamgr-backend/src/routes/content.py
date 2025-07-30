@@ -33,8 +33,8 @@ def get_user_or_404(uid):
 def check_and_decrement_quota(user, content_type):
     quota_map = {
         'image': 'image_quota',
-        'video': 'video_v2_quota', # Assuming Veo maps to v2 quota
-        'text': 'image_quota'
+        'video': 'video_v2_quota',
+        'text': 'text_quota'
     }
     quota_attr = quota_map.get(content_type)
     if not quota_attr:
@@ -65,12 +65,9 @@ def generate_image_content(prompt):
     bucket = storage_client.bucket(BUCKET_NAME)
     blob = bucket.blob(file_name)
     
-    from io import BytesIO
-    image_bytes = BytesIO()
-    images[0].save(image_bytes, format='PNG')
-    image_bytes.seek(0)
+    image_bytes = images[0].to_bytes()
+    blob.upload_from_string(image_bytes, content_type='image/png')
     
-    blob.upload_from_file(image_bytes, content_type='image/png')
     blob.make_public()
     return blob.public_url
 
@@ -86,11 +83,9 @@ def generate_video_content(prompt):
 
     print(f"Started video generation operation: {operation.operation.name}")
     
-    # Poll for completion
-    while not operation.done:
-        time.sleep(10) # Poll every 10 seconds
-        operation = genai.get_operation(operation.operation.name)
-        print(f"Polling video generation status: {operation.metadata.state.name}")
+    # Wait for the operation to complete.
+    print("Polling video generation status...")
+    operation.result() # This call blocks until the operation is complete.
 
     if operation.error:
         raise Exception(f"Video generation failed: {operation.error.message}")

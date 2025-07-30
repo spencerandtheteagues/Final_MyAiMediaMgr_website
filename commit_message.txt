@@ -1,2 +1,1 @@
-fix(app): ensure full user object is fetched on load
-feat(backend): add endpoint to fetch full user details
+fix(backend): implement all fixes for content generation pipeline

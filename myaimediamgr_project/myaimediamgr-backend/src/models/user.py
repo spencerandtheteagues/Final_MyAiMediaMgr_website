@@ -21,6 +21,7 @@ class User(db.Model):
     image_quota = db.Column(db.Integer, default=100)
     video_v2_quota = db.Column(db.Integer, default=0)
     video_v3_quota = db.Column(db.Integer, default=0)
+    text_quota = db.Column(db.Integer, default=1000) # Add new text quota
 
     # Payment information
     stripe_customer_id = db.Column(db.String(100))
@@ -65,6 +66,7 @@ class User(db.Model):
             'image_quota': self.image_quota,
             'video_v2_quota': self.video_v2_quota,
             'video_v3_quota': self.video_v3_quota,
+            'text_quota': self.text_quota,
             'payment_method_verified': self.payment_method_verified,
             'has_access': self.has_access(),
             'is_trial_active': self.is_trial_active(),
