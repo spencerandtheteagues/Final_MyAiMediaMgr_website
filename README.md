@@ -6,4 +6,4 @@ This repository contains the production build for the MyAiMediaMgr website.
 
 *Last triggered build: 2025-07-29 23:45 UTC*
 
-*Triggering new build to apply IAM permission changes (attempt 2).*
+*Triggering new build after re-enabling the trigger.*
