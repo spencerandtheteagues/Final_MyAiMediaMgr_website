@@ -22,7 +22,7 @@ BUCKET_NAME = "final-myaimediamgr-website-media"
 # Initialize clients
 vertexai.init(project=PROJECT_ID, location=LOCATION)
 firestore_db = firestore.Client(project=PROJECT_ID)
-storage_client = storage.Client(project=PROJECT_ID)
+storage_client = storage.Client()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # --- Helper Functions ---
