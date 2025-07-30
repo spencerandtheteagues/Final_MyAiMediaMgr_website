@@ -44,16 +44,17 @@ def check_and_decrement_quota(user, content_type):
     if not quota_attr:
         raise Exception("Invalid content type for quota check")
 
-    current_val = getattr(user, quota_attr)
-    
-    # If quota is not set (None), treat as 0
-    if current_val is None:
-        current_val = 0
+    with db.session.begin_nested():
+        # Lock the user row for update
+        user_to_update = db.session.query(User).filter_by(id=user.id).with_for_update().one()
 
-    if current_val <= 0:
-        raise Exception(f"No {content_type} credits remaining.")
-    
-    setattr(user, quota_attr, current_val - 1)
+        current_val = getattr(user_to_update, quota_attr)
+        
+        if current_val is None or current_val <= 0:
+            raise Exception(f"No {content_type} credits remaining.")
+        
+        setattr(user_to_update, quota_attr, current_val - 1)
+
     return True
 
 # --- AI Model Generation Functions ---

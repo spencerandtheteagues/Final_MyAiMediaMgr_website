@@ -1,1 +1,1 @@
-fix(api): resolve quota check error for admin and None values
+fix(api): use transaction for quota check to prevent race conditions
