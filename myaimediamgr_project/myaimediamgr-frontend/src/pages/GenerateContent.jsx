@@ -20,11 +20,11 @@ import xLogo from '@/assets/social-icons/x-logo.svg';
 import youtubeLogo from '@/assets/social-icons/youtube-logo.svg';
 
 const platforms = [
-  { id: 'twitter', name: 'Twitter', icon: xLogo, color: 'bg-black' },
+  { id: 'twitter', name: 'X', icon: xLogo, color: 'bg-black', iconColor: 'text-white' },
   { id: 'instagram', name: 'Instagram', icon: instagramLogo, color: 'bg-gradient-to-r from-purple-500 to-pink-500' },
   { id: 'linkedin', name: 'LinkedIn', icon: linkedinLogo, color: 'bg-blue-700' },
   { id: 'facebook', name: 'Facebook', icon: facebookLogo, color: 'bg-blue-600' },
-  { id: 'tiktok', name: 'TikTok', icon: tiktokLogo, color: 'bg-black' },
+  { id: 'tiktok', name: 'TikTok', icon: tiktokLogo, color: 'bg-black', iconColor: 'text-white' },
   { id: 'youtube', name: 'YouTube', icon: youtubeLogo, color: 'bg-red-600' }
 ];
 
@@ -303,7 +303,7 @@ function GenerateContent({ user }) {
                           className={cn("cursor-pointer p-3 rounded-lg border-2 flex items-center space-x-2 transition-all",
                             selectedPlatforms.includes(platform.id) ? 'border-purple-500 bg-purple-500/10' : 'border-slate-700/50 hover:border-slate-600/50'
                           )}>
-                          <div className={cn("w-5 h-5 rounded-full flex items-center justify-center", platform.color)}>
+                          <div className={cn("w-5 h-5 rounded-full flex items-center justify-center", platform.color, platform.iconColor)}>
                             <img src={platform.icon} alt={platform.name} className="w-3 h-3" />
                           </div>
                           <span className="text-white text-sm font-medium">{platform.name}</span>

@@ -1,1 +1,1 @@
-feat(frontend): overhaul content generation page
+fix(media): implement correct vertex ai image and video generation
