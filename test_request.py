@@ -7,7 +7,7 @@ headers = {
     "Authorization": "Bearer demo_token_2"
 }
 data = {
-    "theme": "a new coffee shop",
+    "theme": "a new brand of artisanal, small-batch ice cream",
     "uid": 2,
     "contentType": "text"
 }
