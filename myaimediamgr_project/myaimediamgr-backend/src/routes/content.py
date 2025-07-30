@@ -31,6 +31,10 @@ def get_user_or_404(uid):
     return user
 
 def check_and_decrement_quota(user, content_type):
+    # Admin users have unlimited quotas
+    if user.role == 'admin':
+        return True
+
     quota_map = {
         'image': 'image_quota',
         'video': 'video_v2_quota',
@@ -41,11 +45,15 @@ def check_and_decrement_quota(user, content_type):
         raise Exception("Invalid content type for quota check")
 
     current_val = getattr(user, quota_attr)
+    
+    # If quota is not set (None), treat as 0
+    if current_val is None:
+        current_val = 0
+
     if current_val <= 0:
         raise Exception(f"No {content_type} credits remaining.")
     
     setattr(user, quota_attr, current_val - 1)
-    db.session.commit()
     return True
 
 # --- AI Model Generation Functions ---

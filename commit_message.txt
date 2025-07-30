@@ -1,1 +1,1 @@
-fix(build): remove reference to non-existent file in Dockerfile
+fix(api): resolve quota check error for admin and None values
