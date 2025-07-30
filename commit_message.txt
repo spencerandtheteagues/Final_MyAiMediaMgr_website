@@ -1,1 +1,1 @@
-fix(backend): implement all fixes for content generation pipeline
+fix(build): correct Dockerfile build order
