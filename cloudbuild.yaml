@@ -10,11 +10,13 @@ steps:
   # Apply database migrations
   - name: 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest'
     entrypoint: 'python'
+    dir: '/app'
     args: ['-m', 'flask', '--app', 'src/main', 'db', 'upgrade']
 
   # Seed the admin user
   - name: 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest'
     entrypoint: 'python'
+    dir: '/app'
     args: ['-m', 'src.seed_admin']
     env:
       - 'FLASK_APP=src/main.py'
