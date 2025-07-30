@@ -20,11 +20,11 @@ import xLogo from '@/assets/social-icons/x-logo.svg';
 import youtubeLogo from '@/assets/social-icons/youtube-logo.svg';
 
 const platforms = [
-  { id: 'twitter', name: 'X', icon: xLogo, color: 'bg-black', iconColor: 'text-white' },
+  { id: 'twitter', name: 'X', icon: xLogo, color: 'bg-slate-200' },
   { id: 'instagram', name: 'Instagram', icon: instagramLogo, color: 'bg-gradient-to-r from-purple-500 to-pink-500' },
   { id: 'linkedin', name: 'LinkedIn', icon: linkedinLogo, color: 'bg-blue-700' },
   { id: 'facebook', name: 'Facebook', icon: facebookLogo, color: 'bg-blue-600' },
-  { id: 'tiktok', name: 'TikTok', icon: tiktokLogo, color: 'bg-black', iconColor: 'text-white' },
+  { id: 'tiktok', name: 'TikTok', icon: tiktokLogo, color: 'bg-slate-200' },
   { id: 'youtube', name: 'YouTube', icon: youtubeLogo, color: 'bg-red-600' }
 ];
 
@@ -237,8 +237,8 @@ function GenerateContent({ user }) {
 
         {/* Media Preview */}
         <Card className={cn(
-          "bg-slate-800/30 border-slate-700/50 backdrop-blur-sm flex-grow flex flex-col",
-          creationMode === 'manual' && "max-h-[250px]" // Constrain height in manual mode
+          "bg-slate-800/30 border-slate-700/50 backdrop-blur-sm flex-grow flex flex-col min-h-[420px] pb-6",
+          creationMode === 'manual' && "max-h-[300px]"
         )}>
           <CardHeader>
             <CardTitle className="text-white flex items-center">
@@ -380,7 +380,7 @@ function GenerateContent({ user }) {
                     <Textarea placeholder="What's on your mind?" value={manualText} onChange={(e) => setManualText(e.target.value)} className="bg-slate-700/50 border-slate-600/50 text-white min-h-32" />
                   </div>
                   {/* File Upload */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 pb-6">
                     <Label className="text-white">3. Upload Media *</Label>
                     <div {...getRootProps()} className={cn('p-10 rounded-xl border-2 border-dashed border-slate-600/50 text-center cursor-pointer hover:border-blue-500 transition-colors', isDragActive && 'border-blue-500 bg-blue-500/10')}>
                       <input {...getInputProps()} />
@@ -392,11 +392,11 @@ function GenerateContent({ user }) {
                       )}
                     </div>
                   </div>
-                  <div className="flex space-x-4">
-                    <Button onClick={() => handleManualSubmit(false)} disabled={loading || !manualText.trim() || !manualFile || selectedPlatforms.length === 0} className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 disabled:opacity-50">
+                  <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <Button onClick={() => handleManualSubmit(false)} disabled={loading || !manualText.trim() || !manualFile || selectedPlatforms.length === 0} className="w-full md:w-auto h-12 text-base font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 disabled:opacity-50">
                       <Send className="w-4 h-4 mr-2" /><span>Add to Queue</span>
                     </Button>
-                     <Button onClick={() => handleManualSubmit(true)} disabled={loading || !manualText.trim() || !manualFile || selectedPlatforms.length === 0} className="w-full h-12 text-base font-semibold bg-gradient-to-r from-green-500 to-emerald-500 disabled:opacity-50">
+                     <Button onClick={() => handleManualSubmit(true)} disabled={loading || !manualText.trim() || !manualFile || selectedPlatforms.length === 0} className="w-full md:w-auto md:ml-auto h-12 text-base font-semibold bg-gradient-to-r from-green-500 to-emerald-500 disabled:opacity-50">
                       <Rocket className="w-4 h-4 mr-2" /><span>Post Now</span>
                     </Button>
                   </div>

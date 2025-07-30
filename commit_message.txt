@@ -1,1 +1,2 @@
-fix(deploy): implement robust runtime database initialization
+fix(ui): apply layout adjustments and icon color fixes
+feat(deploy): implement robust runtime database initialization
