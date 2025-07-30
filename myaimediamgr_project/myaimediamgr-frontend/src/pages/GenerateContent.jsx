@@ -92,8 +92,42 @@ function GenerateContent({ user }) {
   }
 
   const handleGenerate = async () => {
-    // ... (AI generation logic remains the same)
-  };
+    if (!customPrompt.trim() || selectedPlatforms.length === 0) {
+      return
+    }
+
+    setLoading(true)
+    setGeneratedContent('')
+    try {
+      const response = await fetch('/api/content/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: customPrompt,
+          uid: user.id,
+          contentType: contentType,
+          platforms: selectedPlatforms
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate content');
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setGeneratedContent(result.data.text);
+      } else {
+        throw new Error(result.error || 'Unknown error');
+      }
+      
+    } catch (error) {
+      console.error('Content generation failed:', error)
+      setGeneratedContent(`Error: ${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleManualSubmit = async () => {
     if (!manualText.trim() || selectedPlatforms.length === 0) {

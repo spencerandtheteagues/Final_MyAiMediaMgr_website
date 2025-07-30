@@ -1,11 +1,5 @@
-fix(frontend): Restore missing helper functions in GenerateContent
+fix(frontend): Restore handleGenerate function in GenerateContent
 
-This commit fixes a critical rendering error that caused a blank white screen on the Content Generation page. The error was a `ReferenceError` caused by the `handleSelectAll` and other helper functions being accidentally removed.
+This commit fixes a critical bug where the "Generate Content" button was unresponsive. The `handleGenerate` function, which is responsible for calling the AI content generation API, was accidentally replaced with a placeholder comment.
 
-This fix restores the following functions:
-- `handlePlatformToggle`
-- `handleSelectAll`
-- `handleTemplateSelect`
-- `getSelectedPlatformNames`
-
-This change makes the AI Generation tab functional again.
+This fix restores the full implementation of the `handleGenerate` function, making the AI content generation feature functional again.
