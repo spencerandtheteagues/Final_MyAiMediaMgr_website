@@ -192,3 +192,27 @@ def manual_post_route():
         print(f"Error in manual post: {e}")
         return jsonify({'success': False, 'error': f'Failed to create manual post: {str(e)}'}), 500
 
+@content_bp.route('/api/content/pending', methods=['GET'])
+def get_pending_posts():
+    """Fetches all posts with 'pending' status from Firestore."""
+    try:
+        posts_ref = firestore_db.collection('posts')
+        pending_posts_query = posts_ref.where('status', '==', 'pending').order_by('createdAt', direction=firestore.Query.DESCENDING)
+        
+        results = []
+        for doc in pending_posts_query.stream():
+            post_data = doc.to_dict()
+            post_data['id'] = doc.id # Add the document ID
+            
+            # Ensure datetime objects are serializable
+            if 'createdAt' in post_data and isinstance(post_data['createdAt'], datetime):
+                post_data['createdAt'] = post_data['createdAt'].isoformat()
+
+            results.append(post_data)
+            
+        return jsonify({'success': True, 'data': results})
+
+    except Exception as e:
+        print(f"Error fetching pending posts: {e}")
+        return jsonify({'success': False, 'error': f'Failed to fetch pending posts: {str(e)}'}), 500
+
