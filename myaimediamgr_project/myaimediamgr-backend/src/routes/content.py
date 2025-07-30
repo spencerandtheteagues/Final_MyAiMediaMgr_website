@@ -11,6 +11,7 @@ import vertexai
 from vertexai.generative_models import GenerativeModel
 from vertexai.vision_models import ImageGenerationModel
 import google.generativeai as genai
+import logging
 
 content_bp = Blueprint('content', __name__)
 
@@ -113,6 +114,8 @@ def generate_video_content(prompt):
 
 # --- API Endpoints ---
 
+import logging
+
 @content_bp.route('/content/generate', methods=['POST'])
 def generate_content_route():
     try:
@@ -141,7 +144,7 @@ def generate_content_route():
         return jsonify({'success': True, 'data': {'text': text_content, 'media_url': media_url, 'media_type': media_type}})
     except Exception as e:
         db.session.rollback()
-        print(f"Error in content generation: {e}")
+        logging.error(f"Error in content generation: {e}", exc_info=True)
         return jsonify({'success': False, 'error': f'Failed to generate content: {str(e)}'}), 500
 
 @content_bp.route('/content/manual_post', methods=['POST'])
