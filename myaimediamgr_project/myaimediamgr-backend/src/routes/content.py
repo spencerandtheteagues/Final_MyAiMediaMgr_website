@@ -1,5 +1,7 @@
-import google.auth
-import google.auth.transport.requests
+from flask import Blueprint, request, jsonify
+import os
+import time
+from datetime import datetime
 from google.cloud import firestore, storage
 from src.models.user import User
 from src.database import db
@@ -15,12 +17,11 @@ content_bp = Blueprint('content', __name__)
 PROJECT_ID = os.getenv('GOOGLE_PROJECT_ID', 'final-myaimediamgr-website')
 LOCATION = "us-central1"
 BUCKET_NAME = "final-myaimediamgr-website-media"
-SERVICE_ACCOUNT_EMAIL = "myaimediamgr-service@final-myaimediamgr-website.iam.gserviceaccount.com"
 
 # Initialize clients
 vertexai.init(project=PROJECT_ID, location=LOCATION)
 firestore_db = firestore.Client(project=PROJECT_ID)
-storage_client = storage.Client()
+storage_client = storage.Client(project=PROJECT_ID)
 genai.configure()
 
 # --- Helper Functions ---
@@ -66,6 +67,8 @@ def generate_text_content(prompt):
     response = model.generate_content(full_prompt)
     return response.text
 
+import datetime
+
 def generate_image_content(prompt):
     """Generates an image using Imagen, uploads to GCS, and returns a signed URL."""
     model = ImageGenerationModel.from_pretrained("imagen-4.0-generate-preview-06-06")
@@ -79,16 +82,11 @@ def generate_image_content(prompt):
     image_bytes = images[0]._image_bytes
     blob.upload_from_string(image_bytes, content_type='image/png')
     
-    # Generate a signed URL using the service account's IAM permissions
-    credentials, project_id = google.auth.default()
-    credentials.refresh(google.auth.transport.requests.Request())
-    
+    # Generate a signed URL for the blob, valid for 15 minutes
     signed_url = blob.generate_signed_url(
         version="v4",
         expiration=datetime.timedelta(minutes=15),
         method="GET",
-        service_account_email=SERVICE_ACCOUNT_EMAIL,
-        access_token=credentials.token,
     )
     return signed_url
 
@@ -117,18 +115,8 @@ def generate_video_content(prompt):
         blob_name = video_uri.replace(f'gs://{BUCKET_NAME}/', '')
         blob = storage_client.bucket(BUCKET_NAME).blob(blob_name)
         if blob.exists():
-            # Generate a signed URL using the service account's IAM permissions
-            credentials, project_id = google.auth.default()
-            credentials.refresh(google.auth.transport.requests.Request())
-            
-            signed_url = blob.generate_signed_url(
-                version="v4",
-                expiration=datetime.timedelta(minutes=15),
-                method="GET",
-                service_account_email=SERVICE_ACCOUNT_EMAIL,
-                access_token=credentials.token,
-            )
-            return signed_url
+            blob.make_public()
+            return blob.public_url
         else:
             raise Exception("Generated video file not found in GCS.")
     else:
@@ -200,16 +188,11 @@ def manual_post_route():
         blob = storage_client.bucket(BUCKET_NAME).blob(file_name)
         blob.upload_from_file(media_file, content_type=media_file.content_type)
         
-        # Generate a signed URL using the service account's IAM permissions
-        credentials, project_id = google.auth.default()
-        credentials.refresh(google.auth.transport.requests.Request())
-        
+        # Generate a signed URL for the blob, valid for 15 minutes
         media_url = blob.generate_signed_url(
             version="v4",
             expiration=datetime.timedelta(minutes=15),
             method="GET",
-            service_account_email=SERVICE_ACCOUNT_EMAIL,
-            access_token=credentials.token,
         )
         
         # Create post object in Firestore
