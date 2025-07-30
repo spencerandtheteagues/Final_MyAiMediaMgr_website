@@ -1,1 +1,1 @@
-feat(api): update to latest gemini, imagen, and veo models
+fix(api): adapt to new imagen 4 response format

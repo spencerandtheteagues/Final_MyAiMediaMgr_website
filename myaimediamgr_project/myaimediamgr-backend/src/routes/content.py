@@ -6,6 +6,7 @@ from google.cloud import firestore, storage
 from src.models.user import User
 from src.database import db
 import vertexai
+import base64
 from vertexai.generative_models import GenerativeModel
 from vertexai.vision_models import ImageGenerationModel
 import google.generativeai as genai
@@ -75,7 +76,8 @@ def generate_image_content(prompt):
     bucket = storage_client.bucket(BUCKET_NAME)
     blob = bucket.blob(file_name)
     
-    image_bytes = images[0].to_bytes()
+    # Decode the base64 string to bytes
+    image_bytes = base64.b64decode(images[0].b64_content)
     blob.upload_from_string(image_bytes, content_type='image/png')
     
     blob.make_public()
