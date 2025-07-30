@@ -1,1 +1,1 @@
-chore: remove temporary build file
+test: add temporary file to verify auth flow
