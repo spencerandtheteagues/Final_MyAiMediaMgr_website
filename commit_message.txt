@@ -1,1 +1,1 @@
-fix(api): correct duplicate api prefix in content routes
+fix(build): remove reference to non-existent file in Dockerfile
