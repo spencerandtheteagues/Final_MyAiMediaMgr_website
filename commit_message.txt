@@ -1,3 +1,1 @@
-fix(cloudbuild): Set working directory for migration
-
-Sets the working directory to '/app' for the database migration and seeding steps in the `cloudbuild.yaml`. This ensures the flask and python commands can correctly locate the application source code and resolve the 'Could not import main' error.
+chore: Trigger build after IAM update

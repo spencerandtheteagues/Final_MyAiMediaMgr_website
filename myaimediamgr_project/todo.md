@@ -30,6 +30,10 @@
 - [x] Integrate with Gemini AI API
 - [x] Add user management endpoints
 - [x] Create approval workflow endpoints
+- [ ] Implement Veo video generation in `content.py`
+
+### Billing and Subscriptions
+- [ ] Implement the full Stripe checkout flow on user signup
 
 ## Phase 5: Test website locally
 

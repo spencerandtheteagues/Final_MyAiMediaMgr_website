@@ -38,7 +38,7 @@ from google.cloud import storage
 
 def generate_image_content(prompt):
     """Generates an image using Imagen and uploads it to GCS."""
-    model = vision_models.ImageGenerationModel.from_pretrained("imagegeneration@006")
+    model = vision_models.ImageGenerationModel.from_pretrained("imagegeneration@005")
     images = model.generate_images(prompt=prompt, number_of_images=1)
     
     # Upload to GCS
