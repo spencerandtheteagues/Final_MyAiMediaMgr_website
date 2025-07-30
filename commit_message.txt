@@ -1,3 +1,17 @@
-fix(frontend): Unify social media icons in Dashboard
+feat: Implement manual content creation feature
 
-Updates the Dashboard component to use the new, consistent SVG social media icons, replacing the placeholder text avatars. This ensures all brand logos are consistent across the application.
+This commit introduces a major new feature allowing users to create content manually in addition to using the AI generator.
+
+**Frontend:**
+- Adds "AI Generation" and "Manual Creation" tabs to the `GenerateContent.jsx` page.
+- The "Manual Creation" tab includes a text area for post content and a drag-and-drop file uploader for images and videos with a preview.
+- Implements the client-side logic to submit the manual post data to the new backend endpoint.
+
+**Backend:**
+- Adds a new endpoint `/api/content/create-manual` to `content.py`.
+- This endpoint handles multipart/form-data to accept text and an optional media file.
+- Uploads the media file to Google Cloud Storage.
+- Saves the complete post (text, media URL, etc.) to Firestore.
+- Decrements user credits for manual posts.
+
+This provides users with the flexibility to create content in the way that best suits their workflow.

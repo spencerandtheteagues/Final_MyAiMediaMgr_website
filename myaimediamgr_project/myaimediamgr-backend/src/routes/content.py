@@ -169,3 +169,68 @@ def get_pending_content():
     except Exception as e:
         return jsonify({'error': 'Failed to fetch pending content'}), 500
 
+@content_bp.route('/content/create-manual', methods=['POST'])
+def create_manual_content():
+    try:
+        uid = request.form.get('uid')
+        text_content = request.form.get('text')
+        
+        if not uid or not text_content:
+            return jsonify({'error': 'User ID and text content are required'}), 400
+
+        user = User.query.get(uid)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        # Quota Check (assuming manual post costs 1 image credit)
+        if user.image_credits_remaining <= 0:
+            return jsonify({'error': 'No image credits remaining.'}), 403
+
+        image_url = None
+        video_url = None
+        
+        if 'media' in request.files:
+            media_file = request.files['media']
+            
+            bucket_name = "final-myaimediamgr-website-media"
+            file_name = f"manual-{datetime.utcnow().timestamp()}-{media_file.filename}"
+            
+            storage_client = storage.Client()
+            bucket = storage_client.bucket(bucket_name)
+            blob = bucket.blob(file_name)
+            
+            blob.upload_from_file(media_file, content_type=media_file.content_type)
+            blob.make_public()
+            
+            if 'image' in media_file.content_type:
+                image_url = blob.public_url
+            elif 'video' in media_file.content_type:
+                video_url = blob.public_url
+
+        # Decrement Quota
+        user.image_credits_remaining -= 1
+        db.session.commit()
+
+        # Create post object
+        post_data = {
+            'uid': uid,
+            'text': text_content,
+            'status': 'pending',
+            'createdAt': datetime.utcnow(),
+            'theme': 'Manual Post',
+            'imageUrl': image_url,
+            'videoUrl': video_url
+        }
+        
+        # Save to Firestore
+        project_id = os.getenv('GOOGLE_PROJECT_ID', 'final-myaimediamgr-website')
+        firestore_db = firestore.Client(project=project_id)
+        doc_ref = firestore_db.collection('posts').add(post_data)
+        post_data['id'] = doc_ref[1].id
+        
+        return jsonify({'success': True, 'data': post_data})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to create manual content: {str(e)}'}), 500
+

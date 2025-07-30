@@ -31,6 +31,7 @@
 - [x] Add user management endpoints
 - [x] Create approval workflow endpoints
 - [ ] Implement Veo video generation in `content.py`
+- [ ] Add manual text and media upload to content creation
 
 ### Billing and Subscriptions
 - [ ] Implement the full Stripe checkout flow on user signup
