@@ -114,8 +114,6 @@ def generate_video_content(prompt):
 
 # --- API Endpoints ---
 
-import logging
-
 @content_bp.route('/content/generate', methods=['POST'])
 def generate_content_route():
     try:
