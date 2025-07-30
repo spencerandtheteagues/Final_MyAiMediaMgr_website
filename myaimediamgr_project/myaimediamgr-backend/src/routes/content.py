@@ -21,7 +21,7 @@ BUCKET_NAME = "final-myaimediamgr-website-media"
 vertexai.init(project=PROJECT_ID, location=LOCATION)
 firestore_db = firestore.Client(project=PROJECT_ID)
 storage_client = storage.Client(project=PROJECT_ID)
-genai.configure(project=PROJECT_ID)
+genai.configure()
 
 # --- Helper Functions ---
 def get_user_or_404(uid):

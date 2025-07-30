@@ -1,1 +1,1 @@
-fix(app): correct genai client initialization and fix UI overlap
+fix(backend): correct genai configuration argument
