@@ -85,10 +85,17 @@ function GenerateContent({ user }) {
   };
 
   const handleGenerate = async () => {
+    console.log("--- Starting Content Generation ---");
+    console.log("User:", user);
+    console.log("Prompt:", customPrompt);
+    console.log("Content Type:", contentType);
+    console.log("Selected Platforms:", selectedPlatforms);
+
     if (!customPrompt.trim() || selectedPlatforms.length === 0 || !user?.id) {
       toast.error("Missing Information", {
         description: "Please ensure you've selected platforms, entered a prompt, and are logged in.",
       });
+      console.error("Validation failed:", { customPrompt, selectedPlatforms, user });
       return;
     }
 
@@ -99,24 +106,32 @@ function GenerateContent({ user }) {
     setManualTextForAiMedia('');
 
     try {
+      const payload = {
+        theme: customPrompt,
+        uid: user.id,
+        contentType: contentType,
+        platforms: selectedPlatforms,
+        generateText: generateAiText,
+      };
+      console.log("Sending payload to /api/content/generate:", JSON.stringify(payload, null, 2));
+
       const response = await fetch('/api/content/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          theme: customPrompt,
-          uid: user.id,
-          contentType: contentType,
-          platforms: selectedPlatforms,
-          generateText: generateAiText,
-        })
+        body: JSON.stringify(payload)
       });
 
+      console.log("Received response from server:", response);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Server returned an invalid response.' }));
-        throw new Error(errorData.error || 'Failed to generate content');
+        const errorData = await response.json().catch(() => ({ error: 'Server returned an invalid, non-JSON response.' }));
+        console.error("Server returned an error:", errorData);
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
+      console.log("Parsed JSON result:", result);
+
       if (result.success) {
         toast.success("Content Generated!", { description: "Your AI content has been successfully created." });
         if (result.data.text) setGeneratedContent(result.data.text);
@@ -133,6 +148,7 @@ function GenerateContent({ user }) {
       toast.error("Generation Failed", { description: error.message });
     } finally {
       setLoading(false);
+      console.log("--- Content Generation Finished ---");
     }
   };
 
@@ -307,7 +323,14 @@ function GenerateContent({ user }) {
                             selectedPlatforms.includes(platform.id) ? 'border-purple-500 bg-purple-500/10' : 'border-slate-700/50 hover:border-slate-600/50'
                           )}>
                           <div className={cn("w-5 h-5 rounded-full flex items-center justify-center", platform.color, platform.iconColor)}>
-                            <img src={platform.icon} alt={platform.name} className="w-3 h-3" />
+                            <img 
+                              src={platform.icon} 
+                              alt={platform.name} 
+                              className={cn(
+                                "w-3 h-3", 
+                                (platform.id === 'tiktok' || platform.id === 'youtube') && "w-4 h-4"
+                              )} 
+                            />
                           </div>
                           <span className="text-white text-sm font-medium">{platform.name}</span>
                         </div>
@@ -367,7 +390,14 @@ function GenerateContent({ user }) {
                               selectedPlatforms.includes(platform.id) ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700/50 hover:border-slate-600/50'
                             )}>
                             <div className={cn("w-5 h-5 rounded-full flex items-center justify-center", platform.color)}>
-                              <img src={platform.icon} alt={platform.name} className="w-3 h-3" />
+                              <img 
+                              src={platform.icon} 
+                              alt={platform.name} 
+                              className={cn(
+                                "w-3 h-3", 
+                                (platform.id === 'tiktok' || platform.id === 'youtube') && "w-4 h-4"
+                              )} 
+                            />
                             </div>
                             <span className="text-white text-sm font-medium">{platform.name}</span>
                           </div>

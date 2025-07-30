@@ -1,2 +1,2 @@
-fix(ui): apply layout adjustments and icon color fixes
-feat(deploy): implement robust runtime database initialization
+feat(debug): add extensive logging to content generation
+fix(ui): enlarge tiktok and youtube logos
