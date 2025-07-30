@@ -1,1 +1,1 @@
-fix(api): commit quota changes to db
+refactor: remove debugging logs from user routes
