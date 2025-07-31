@@ -9,11 +9,8 @@ from src.models.user import User
 from src.database import db
 import vertexai
 from vertexai.generative_models import GenerativeModel, Image
-from vertexai.preview.vision_models import ImageGenerationModel
+from vertexai.preview.vision_models import ImageGenerationModel, VideoGenerationModel
 import logging
-# Correct SDK for advanced models like Veo
-import google.genai as genai
-from google.genai.types import GenerateVideosConfig
 from google.api_core import exceptions
 
 content_bp = Blueprint('content', __name__)
@@ -23,19 +20,10 @@ PROJECT_ID = os.getenv('GOOGLE_PROJECT_ID', 'final-myaimediamgr-website')
 LOCATION = "us-central1"
 BUCKET_NAME = "final-myaimediamgr-website-media"
 
-# --- Correct Initialization ---
+# --- Correct, Unified Initialization ---
 vertexai.init(project=PROJECT_ID, location=LOCATION)
 storage_client = storage.Client()
 firestore_db = firestore.Client(project=PROJECT_ID)
-
-# Initialize the google-genai client for Vertex AI.
-# This uses Application Default Credentials (ADC) and the project/location
-# set in the environment or detected by the library.
-try:
-    genai_client = genai.Client()
-except Exception as e:
-    logging.error(f"Failed to initialize google.genai.Client: {e}", exc_info=True)
-    genai_client = None
 
 # --- Helper Functions ---
 def get_user_or_404(uid):
@@ -64,32 +52,41 @@ def check_and_decrement_quota(user, content_type):
 def generate_signed_url_for_gcs_uri(gcs_uri):
     """Generates a temporary, publicly accessible URL for a GCS object."""
     try:
-        bucket_name = gcs_uri.split('/')[2]
-        blob_name = '/'.join(gcs_uri.split('/')[3:])
+        # This logic assumes gcs_uri is in the format "gs://bucket_name/blob_name"
+        if not gcs_uri.startswith("gs://"):
+            logging.error(f"Invalid GCS URI provided for signing: {gcs_uri}")
+            return gcs_uri # Return original URI if format is incorrect
+
+        bucket_name, blob_name = gcs_uri.replace("gs://", "").split("/", 1)
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(blob_name)
 
         credentials, _ = google.auth.default()
-        if credentials.token is None:
-            credentials.refresh(google.auth.transport.requests.Request())
-        
+        if hasattr(credentials, 'service_account_email'):
+            service_account_email = credentials.service_account_email
+        else:
+            # Fallback for local development or different credential types
+            # You might need to configure this more specifically for your environment
+            logging.warning("Service account email not found in credentials, using signer's identity.")
+            req = google.auth.transport.requests.Request()
+            credentials.refresh(req)
+            service_account_email = credentials.signer_email
+
+
         signed_url = blob.generate_signed_url(
             version="v4",
             expiration=datetime.now(timezone.utc) + timedelta(minutes=15),
-            method="GET",
-            service_account_email=credentials.service_account_email,
-            access_token=credentials.token,
+            method="GET"
         )
         return signed_url
     except Exception as e:
         logging.error(f"Failed to generate signed URL for {gcs_uri}: {e}", exc_info=True)
-        # Return the original GCS URI as a fallback
         return gcs_uri
 
 # --- AI Model Generation Functions ---
 
 def generate_caption_for_image(image_bytes, theme, platforms):
-    """Generates a caption for a given image using a multimodal model, tailored to platform constraints."""
+    """Generates a caption for a given image using a multimodal model."""
     model = GenerativeModel("gemini-1.5-flash")
     image = Image.from_bytes(image_bytes)
     
@@ -105,7 +102,7 @@ def generate_caption_for_image(image_bytes, theme, platforms):
     selected_platforms_details = [p for p in [platform_map.get(p_id) for p_id in platforms] if p]
     
     if not selected_platforms_details:
-        strictest_limit = 280 # Default fallback
+        strictest_limit = 280
         platform_details_string = "general social media"
     else:
         strictest_limit = min(p['limit'] for p in selected_platforms_details)
@@ -114,7 +111,7 @@ def generate_caption_for_image(image_bytes, theme, platforms):
     prompt = [
         f"You are an expert social media manager. Analyze this image and the user's original theme. Write an engaging and concise caption for a social media post.",
         f"The caption will be used on the following platforms: {platform_details_string}.",
-        f"CRUCIALLY, the entire caption must be no more than {strictest_limit} characters long to be compatible with all selected platforms.",
+        f"CRUCIALLY, the entire caption must be no more than {strictest_limit} characters long.",
         "The caption must be relevant to both the image and the theme. Include 2-3 relevant hashtags.",
         f"User's Theme: {theme}",
         image
@@ -126,18 +123,12 @@ def generate_caption_for_image(image_bytes, theme, platforms):
 def generate_image_content(brief):
     """Generates an image and returns the signed URL and the image bytes."""
     prompt_parts = [
-        brief.get('mainSubject'),
-        brief.get('setting'),
-        brief.get('style'),
-        brief.get('details')
+        brief.get('mainSubject'), brief.get('setting'), brief.get('style'), brief.get('details')
     ]
     engineered_prompt = ", ".join(filter(None, prompt_parts))
 
     model = ImageGenerationModel.from_pretrained("imagegeneration@006")
-    images = model.generate_images(
-        prompt=engineered_prompt,
-        number_of_images=1,
-    )
+    images = model.generate_images(prompt=engineered_prompt, number_of_images=1)
     
     image_bytes = images[0]._image_bytes
     
@@ -153,72 +144,34 @@ def generate_image_content(brief):
 
 def generate_video_content(brief):
     """Generates a video using Veo on Vertex AI and returns the signed URL."""
-    if not genai_client:
-        raise Exception("Video generation client is not initialized. Check logs for errors.")
-
-    # Engineer a detailed prompt from the structured brief
     prompt_parts = [
-        brief.get('mainSubject'),
-        brief.get('setting'),
-        brief.get('style'),
-        brief.get('details')
+        brief.get('mainSubject'), brief.get('setting'), brief.get('style'), brief.get('details')
     ]
     engineered_prompt = ", ".join(filter(None, prompt_parts))
     
-    output_gcs_uri = f"gs://{BUCKET_NAME}/video-outputs/{int(time.time())}/"
-    model_name = "veo-1.0.0-generate-001" # Using a stable Veo model identifier
-
+    output_gcs_dir = f"gs://{BUCKET_NAME}/video-outputs/"
+    
     logging.info(f"Starting video generation for prompt: '{engineered_prompt}'")
 
-    # Initiate the Long-Running Operation (LRO)
-    operation = genai_client.models.generate_videos(
-        model=model_name,
-        prompt=engineered_prompt,
-        config=GenerateVideosConfig(
-            output_gcs_uri=output_gcs_uri,
-            aspect_ratio="16:9",
-            person_generation="allow_adult"
-        ),
-    )
-
-    logging.info(f"Video generation operation started: {operation.operation.name}")
+    model = VideoGenerationModel.from_pretrained("video-generation-001")
     
-    # Poll for completion - in a real-world scenario, this should be a background task
-    # For a standard HTTP request, we poll for a reasonable amount of time.
-    # A more robust solution would use Cloud Tasks or Pub/Sub to handle the LRO result.
-    polling_deadline = time.time() + 300 # 5-minute deadline for polling
-    while not operation.done and time.time() < polling_deadline:
-        time.sleep(20) # Wait between checks
-        try:
-            # The operation object must be refreshed to get the latest status
-            operation = genai_client.operations.get(operation)
-            if operation.metadata:
-                logging.info(f"Video generation progress: {operation.metadata.progress_percent}%")
-        except exceptions.GoogleAPICallError as e:
-            logging.error(f"Error while polling for video status: {e}", exc_info=True)
-            # Decide if the error is retryable or fatal
-            if e.code in [503, 504]: # Service Unavailable, Gateway Timeout
-                continue # Retry polling
-            else:
-                raise Exception(f"API error during polling: {e.message}")
-
-    if not operation.done:
-        logging.warning("Video generation timed out from the server's perspective.")
-        # Here you could return a pending status to the client
-        raise Exception("Video generation is taking longer than expected. Please check the queue later.")
-
-    if operation.error:
-        logging.error(f"Video generation LRO failed with error: {operation.error.message}")
-        raise Exception(f"Failed to generate video: {operation.error.message}")
-
-    if operation.response:
-        video_gcs_uri = operation.result.generated_videos.video.uri
-        logging.info(f"Video generation successful. Output at: {video_gcs_uri}")
-        signed_url = generate_signed_url_for_gcs_uri(video_gcs_uri)
-        return signed_url
-    else:
-        raise Exception("Operation finished but no video was generated.")
-
+    # This call is asynchronous and returns immediately
+    video_operation = model.generate(
+        prompt=engineered_prompt,
+        output_bucket_name=output_gcs_dir,
+    )
+    
+    logging.info(f"Video generation operation started: {video_operation._operation.name}")
+    
+    # In a production app, you wouldn't block the request. You'd poll in the background.
+    # For this implementation, we poll for a result with a timeout.
+    result = video_operation.wait_for_result(timeout=1800) # Wait up to 30 minutes
+    
+    gcs_uri = result.gcs_uri
+    logging.info(f"Video generation successful. Output at: {gcs_uri}")
+    
+    signed_url = generate_signed_url_for_gcs_uri(gcs_uri)
+    return signed_url
 
 # --- API Endpoints ---
 
@@ -231,7 +184,7 @@ def generate_content_route():
         content_type = data.get('contentType')
         platforms = data.get('platforms')
         
-        if not brief or not uid or not content_type or not platforms:
+        if not all([brief, uid, content_type, platforms]):
             return jsonify({'success': False, 'error': 'Missing required fields'}), 400
 
         user = get_user_or_404(uid)
@@ -242,13 +195,11 @@ def generate_content_route():
         if content_type == 'image':
             media_url, image_bytes = generate_image_content(brief)
             media_type = 'image'
-            # Use the 'captionTheme' from the brief for generating the caption
             text_content = generate_caption_for_image(image_bytes, brief.get('captionTheme'), platforms)
         
         elif content_type == 'video':
             media_url = generate_video_content(brief)
             media_type = 'video'
-            # Generate a simple placeholder caption for the video for now
             text_content = f"An AI-generated video based on the theme: {brief.get('captionTheme')}"
 
         db.session.commit()
@@ -257,7 +208,6 @@ def generate_content_route():
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error in content generation: {e}", exc_info=True)
-        # Provide a more specific error message if it's a known exception type
         if isinstance(e, exceptions.GoogleAPICallError):
             return jsonify({'success': False, 'error': f'Cloud API Error: {e.message}'}), 500
         return jsonify({'success': False, 'error': f'Failed to generate content: {str(e)}'}), 500

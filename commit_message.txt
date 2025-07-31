@@ -1,5 +1,9 @@
-fix(video): Remove unsupported 'duration' parameter from GenerateVideosConfig
+refactor(video): Unify AI client initialization under Vertex AI SDK
 
-This commit fixes a 500 Internal Server Error during video generation. The error was caused by a Pydantic validation failure in the `google-genai` library, which does not support the `duration` parameter in the version used by the application.
+This commit refactors the video generation functionality to align with the application's established architecture for AI model interaction.
 
-The `duration` parameter has been removed from the `GenerateVideosConfig` object in the `generate_video_content` function to resolve the issue.
+- Removes the `google-genai` library and its separate API key authentication, which was causing errors.
+- All generative AI calls (Image, Video, Text) are now consistently handled by the `vertexai` library, using Application Default Credentials (ADC) for authentication.
+- The `generate_video_content` function now uses the `VideoGenerationModel` from `vertexai.preview.vision_models`, mirroring the working logic of the image generation.
+
+This change resolves the `ValueError: output_gcs_uri parameter is not supported in Gemini API` by ensuring all API calls correctly target the Vertex AI platform.
