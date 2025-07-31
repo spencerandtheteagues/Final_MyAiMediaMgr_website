@@ -7,7 +7,8 @@ import google.auth
 import google.auth.transport.requests
 from src.models.user import User
 from src.database import db
-from vertexai.preview.vision_models import ImageGenerationModel
+import vertexai
+from vertexai.preview.vision_models import ImageGenerationModel, Image
 import google.generativeai as genai
 import logging
 
@@ -23,30 +24,7 @@ vertexai.init(project=PROJECT_ID, location=LOCATION)
 storage_client = storage.Client()
 firestore_db = firestore.Client(project=PROJECT_ID)
 
-# Correctly configure the genai library with the API key
 if os.getenv("GEMINI_API_KEY"):
-    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-else:
-    logging.warning("GEMINI_API_KEY not found. Video generation will be disabled.")
-    genai = None
-
-content_bp = Blueprint('content', __name__)
-
-# --- Environment Setup ---
-PROJECT_ID = os.getenv('GOOGLE_PROJECT_ID', 'final-myaimediamgr-website')
-LOCATION = "us-central1"
-BUCKET_NAME = "final-myaimediamgr-website-media"
-
-# --- Correct Initialization ---
-# Initialize AI Platform client. ADC will be used within request handlers.
-aiplatform.init(project=PROJECT_ID, location=LOCATION)
-storage_client = storage.Client()
-firestore_db = firestore.Client(project=PROJECT_ID)
-
-# Correctly configure the genai library with the API key
-# This was a critical missing step from the previous analysis.
-if os.getenv("GEMINI_API_KEY"):
-    import google.generativeai as genai
     genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 else:
     logging.warning("GEMINI_API_KEY not found. Video generation will be disabled.")
@@ -80,25 +58,22 @@ def check_and_decrement_quota(user, content_type):
 
 def generate_text_content(prompt):
     # This function is a placeholder as text is generated with the media
-    # In a text-only scenario, you would use the Gemini model here.
     return f"A generated caption for the theme: {prompt}"
 
 def generate_image_content(prompt):
     model = ImageGenerationModel.from_pretrained("imagegeneration@006")
-    response = model.generate_images(
+    images = model.generate_images(
         prompt=prompt,
         number_of_images=1,
-        add_watermark=False, # As per analysis recommendation
     )
     
-    image_bytes = response.images[0]._image_bytes
+    image_bytes = images[0]._image_bytes
     
     file_name = f"generated-media/image-{int(time.time())}.png"
     bucket = storage_client.bucket(BUCKET_NAME)
     blob = bucket.blob(file_name)
     blob.upload_from_string(image_bytes, content_type='image/png')
     
-    # Correctly generate signed URL inside the handler using ADC
     credentials, _ = google.auth.default()
     credentials.refresh(google.auth.transport.requests.Request())
     
@@ -116,7 +91,6 @@ def generate_video_content(prompt):
         raise Exception("Video generation is disabled due to missing GEMINI_API_KEY.")
         
     output_gcs_uri = f"gs://{BUCKET_NAME}/generated-media/"
-    # Use the correct, modern model identifier for Veo
     operation = genai.generate_videos(
         model="veo-001", prompt=prompt, output_gcs_uri=output_gcs_uri
     )
