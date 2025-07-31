@@ -1,1 +1,1 @@
-fix(api): final comprehensive fix for content generation v3
+fix(api): add gemini api key to cloud run environment

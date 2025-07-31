@@ -19,7 +19,7 @@ steps:
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--service-account=myaimediamgr-service@final-myaimediamgr-website.iam.gserviceaccount.com'
-      - '--set-env-vars=GOOGLE_PROJECT_ID=final-myaimediamgr-website'
+      - '--set-env-vars=GOOGLE_PROJECT_ID=final-myaimediamgr-website,GEMINI_API_KEY=AIzaSyDthpeK9UNiHEj2VGtmqp-p_rXR01iLXKs'
 
 images:
   - 'us-central1-docker.pkg.dev/final-myaimediamgr-website/myaimediamgr-repo/myaimediamgr-prod:latest'
