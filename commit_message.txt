@@ -1,12 +1,7 @@
-fix(video): Implement definitive video generation fix
+fix(deploy): Correct Gunicorn startup for Cloud Run
 
-This commit resolves all remaining video generation issues by refactoring the implementation to use the correct preview modules and classes from the Vertex AI SDK, and forcing a library version upgrade.
+This commit resolves the container startup failure by implementing the correct Gunicorn configuration for a Flask application on Google Cloud Run.
 
-- Updates `requirements.txt` to use `google-cloud-aiplatform>=1.55.0` to ensure the necessary `preview` modules are available in the build environment.
-- Replaces all incorrect `Model` and `VideoGenerationModel` imports.
-- The `generate_video_content` function now correctly imports `VideoGenerationModel` from `vertexai.preview.vision_models`.
-- Instantiates the model with a valid, available Veo model name (`veo-3.0-fast-generate-preview`).
-- Uses the `generate()` and `load()` methods to correctly handle the video generation and retrieval of video bytes.
-- Implements the correct pattern of uploading the generated video bytes to GCS and creating a signed URL for the frontend.
-
-This is the definitive fix that aligns the application's behavior with the specific requirements of the Veo preview API.
+- Removes the `if __name__ == '__main__':` block from `src/main.py`, as it is not used by a production WSGI server.
+- Updates the `entrypoint.sh` script to use the correct `gunicorn --bind 0.0.0.0:$PORT` command, ensuring the application listens on the correct network interface and port provided by the Cloud Run environment.
+- Adjusts the `gunicorn` command to use `src.main:app` to correctly locate the Flask app instance.
