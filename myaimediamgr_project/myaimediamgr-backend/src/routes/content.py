@@ -177,7 +177,6 @@ def generate_video_content(brief):
         config=GenerateVideosConfig(
             output_gcs_uri=output_gcs_uri,
             aspect_ratio="16:9",
-            duration=6,
             person_generation="allow_adult"
         ),
     )

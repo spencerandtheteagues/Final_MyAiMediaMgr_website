@@ -1,1 +1,5 @@
-refactor: Write admin user ID to a file in seeder
+fix(video): Remove unsupported 'duration' parameter from GenerateVideosConfig
+
+This commit fixes a 500 Internal Server Error during video generation. The error was caused by a Pydantic validation failure in the `google-genai` library, which does not support the `duration` parameter in the version used by the application.
+
+The `duration` parameter has been removed from the `GenerateVideosConfig` object in the `generate_video_content` function to resolve the issue.
