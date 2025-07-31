@@ -1,8 +1,1 @@
-feat(api): Implement rate limiting and exponential backoff
-
-This commit introduces resilience mechanisms to handle API quota limitations gracefully.
-
-- **Rate Limiting:** Adds `Flask-Limiter` to the application to control the rate of incoming requests to the content generation endpoint. This provides a server-side control to prevent users from hitting API limits.
-- **Exponential Backoff:** Implements a retry mechanism using the `tenacity` library for all AI content generation functions (`image`, `video`, `text`). If a `ResourceExhausted` error is encountered, the request will be retried up to 3 times with an exponentially increasing delay.
-
-These changes will prevent the application from crashing when quota limits are reached and will improve the user experience by automatically retrying failed requests.
+chore: Revert debugging changes from seeder
