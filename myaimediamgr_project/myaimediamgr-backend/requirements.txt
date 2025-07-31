@@ -44,3 +44,4 @@ gunicorn
 google-cloud-secret-manager
 google-cloud-aiplatform>=1.56.0
 google-cloud-storage
+google-generativeai
