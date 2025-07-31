@@ -17,6 +17,8 @@ try:
     from src.routes.user import user_bp
     from src.routes.content import content_bp
     from src.routes.subscription import subscription_bp
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
 
     # Load environment variables
     load_dotenv()
@@ -26,6 +28,14 @@ try:
 
     # Enable CORS
     CORS(app)
+
+    # Set up rate limiting
+    limiter = Limiter(
+        get_remote_address,
+        app=app,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri="memory://",
+    )
 
     app.register_blueprint(user_bp, url_prefix='/api')
     app.register_blueprint(content_bp, url_prefix='/api')

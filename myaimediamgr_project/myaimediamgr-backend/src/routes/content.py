@@ -12,6 +12,7 @@ from vertexai.preview.generative_models import GenerativeModel, Image
 from vertexai.preview.vision_models import ImageGenerationModel
 import logging
 from google.api_core import exceptions
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 content_bp = Blueprint('content', __name__)
 
@@ -72,6 +73,11 @@ def generate_signed_url_for_gcs_uri(gcs_uri):
 
 # --- AI Model Generation Functions ---
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    retry=retry_if_exception_type(exceptions.ResourceExhausted)
+)
 def generate_caption_for_image(image_bytes, theme, platforms):
     """Generates a caption for a given image using a multimodal model."""
     model = GenerativeModel("gemini-1.5-flash")
@@ -107,6 +113,11 @@ def generate_caption_for_image(image_bytes, theme, platforms):
     response = model.generate_content(prompt)
     return response.text
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    retry=retry_if_exception_type(exceptions.ResourceExhausted)
+)
 def generate_image_content(brief):
     """Generates an image and returns the signed URL and the image bytes."""
     prompt_parts = [
@@ -129,6 +140,11 @@ def generate_image_content(brief):
     
     return signed_url, image_bytes
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    retry=retry_if_exception_type(exceptions.ResourceExhausted)
+)
 def generate_video_content(brief):
     """Generates a video using Veo on Vertex AI and returns the signed URL."""
     prompt_parts = [
@@ -138,14 +154,12 @@ def generate_video_content(brief):
     
     logging.info(f"Starting video generation for prompt: '{engineered_prompt}'")
 
-    # Use the GenerativeModel class for Veo
     model = GenerativeModel("veo-2.0-generate-001")
 
-    # The SDK handles the GCS output implicitly when using a video model
     response = model.generate_content(
         [engineered_prompt],
         generation_config={
-            "max_output_tokens": 2048, # This might not be directly applicable to video, but is a common param
+            "max_output_tokens": 2048,
             "temperature": 0.4,
             "top_p": 1,
             "top_k": 32
@@ -153,8 +167,6 @@ def generate_video_content(brief):
         stream=False,
     )
     
-    # The response for video generation will contain the GCS URI
-    # This part of the response structure might need adjustment based on actual output
     if not response.parts:
         raise Exception("Video generation failed to produce a valid response part.")
 

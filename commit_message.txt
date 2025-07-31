@@ -1,9 +1,8 @@
-fix(video): Correct video generation with preview GenerativeModel
+feat(api): Implement rate limiting and exponential backoff
 
-This commit resolves the container startup failure and implements the correct, unified approach for video generation.
+This commit introduces resilience mechanisms to handle API quota limitations gracefully.
 
-- Replaces the incorrect `VideoGenerationModel` import with the correct `GenerativeModel` from `vertexai.preview.generative_models`.
-- Updates the video generation logic to use the standard `generate_content` method with the `veo-2.0-generate-001` model, aligning it with the latest SDK practices for preview models.
-- All AI generation now consistently uses the `vertexai` library with Application Default Credentials, removing the last remnants of the separate `google-genai` and API key configuration.
+- **Rate Limiting:** Adds `Flask-Limiter` to the application to control the rate of incoming requests to the content generation endpoint. This provides a server-side control to prevent users from hitting API limits.
+- **Exponential Backoff:** Implements a retry mechanism using the `tenacity` library for all AI content generation functions (`image`, `video`, `text`). If a `ResourceExhausted` error is encountered, the request will be retried up to 3 times with an exponentially increasing delay.
 
-This change fixes the `ImportError` and ensures that video generation targets the Vertex AI platform correctly.
+These changes will prevent the application from crashing when quota limits are reached and will improve the user experience by automatically retrying failed requests.

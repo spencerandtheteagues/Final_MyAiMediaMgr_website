@@ -44,3 +44,4 @@ gunicorn
 google-cloud-secret-manager
 google-cloud-aiplatform>=1.38.0
 google-cloud-storage
+Flask-Limiter 
