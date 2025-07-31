@@ -1,1 +1,1 @@
-feat(api): migrate to google-cloud-aiplatform sdk
+fix(api): implement final comprehensive fix for content generation
