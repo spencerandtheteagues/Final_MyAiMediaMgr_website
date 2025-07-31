@@ -7,7 +7,7 @@ import google.auth
 import google.auth.transport.requests
 from src.models.user import User
 from src.database import db
-from google.cloud import aiplatform
+from vertexai.preview.vision_models import ImageGenerationModel
 from google.api_core import exceptions
 import base64
 import logging

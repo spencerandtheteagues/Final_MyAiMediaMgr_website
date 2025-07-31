@@ -1,1 +1,1 @@
-fix(api): add missing google-generativeai dependency
+fix(api): correct import for ImageGenerationModel
