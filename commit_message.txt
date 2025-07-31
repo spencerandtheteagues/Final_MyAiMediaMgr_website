@@ -2,4 +2,4 @@ fix(video): Correct generic Model import for Veo API call
 
 This commit fixes a container startup crash caused by an `AttributeError`.
 
-The `vertexai.Model` class was being called incorrectly. The import statement has been corrected to `from vertexai.generative_models import Model` to properly load the generic model class required for the low-level `predict_long_running` API call to the Veo model.
+The `vertexai.Model` class was being called incorrectly. The import statement has been corrected to `import vertexai.generative_models as generative_models` to properly load the generic model class required for the low-level `predict_long_running` API call to the Veo model.

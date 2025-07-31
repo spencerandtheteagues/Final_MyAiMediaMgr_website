@@ -13,6 +13,11 @@ from vertexai.preview.vision_models import ImageGenerationModel
 from vertexai.preview.generative_models import Part
 from vertexai.language_models import TextGenerationModel
 from vertexai.vision_models import ImageGenerationModel
+import vertexai.generative_models as generative_models
+from vertexai.preview.vision_models import ImageGenerationModel
+from vertexai.preview.generative_models import Part
+from vertexai.language_models import TextGenerationModel
+from vertexai.vision_models import ImageGenerationModel
 from vertexai.generative_models import Model
 from vertexai.preview.vision_models import ImageGenerationModel
 from vertexai.generative_models._generative_models import Part
