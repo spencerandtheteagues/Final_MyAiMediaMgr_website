@@ -1,1 +1,1 @@
-feat(api): enhance caption generation with platform-specific context
+chore: remove temporary commit message file
