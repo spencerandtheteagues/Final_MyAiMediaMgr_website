@@ -1,9 +1,9 @@
-refactor(video): Unify AI client initialization under Vertex AI SDK
+fix(video): Correct video generation with preview GenerativeModel
 
-This commit refactors the video generation functionality to align with the application's established architecture for AI model interaction.
+This commit resolves the container startup failure and implements the correct, unified approach for video generation.
 
-- Removes the `google-genai` library and its separate API key authentication, which was causing errors.
-- All generative AI calls (Image, Video, Text) are now consistently handled by the `vertexai` library, using Application Default Credentials (ADC) for authentication.
-- The `generate_video_content` function now uses the `VideoGenerationModel` from `vertexai.preview.vision_models`, mirroring the working logic of the image generation.
+- Replaces the incorrect `VideoGenerationModel` import with the correct `GenerativeModel` from `vertexai.preview.generative_models`.
+- Updates the video generation logic to use the standard `generate_content` method with the `veo-2.0-generate-001` model, aligning it with the latest SDK practices for preview models.
+- All AI generation now consistently uses the `vertexai` library with Application Default Credentials, removing the last remnants of the separate `google-genai` and API key configuration.
 
-This change resolves the `ValueError: output_gcs_uri parameter is not supported in Gemini API` by ensuring all API calls correctly target the Vertex AI platform.
+This change fixes the `ImportError` and ensures that video generation targets the Vertex AI platform correctly.

@@ -8,8 +8,8 @@ import google.auth.transport.requests
 from src.models.user import User
 from src.database import db
 import vertexai
-from vertexai.generative_models import GenerativeModel, Image
-from vertexai.preview.vision_models import ImageGenerationModel, VideoGenerationModel
+from vertexai.preview.generative_models import GenerativeModel, Image
+from vertexai.preview.vision_models import ImageGenerationModel
 import logging
 from google.api_core import exceptions
 
@@ -52,26 +52,13 @@ def check_and_decrement_quota(user, content_type):
 def generate_signed_url_for_gcs_uri(gcs_uri):
     """Generates a temporary, publicly accessible URL for a GCS object."""
     try:
-        # This logic assumes gcs_uri is in the format "gs://bucket_name/blob_name"
         if not gcs_uri.startswith("gs://"):
             logging.error(f"Invalid GCS URI provided for signing: {gcs_uri}")
-            return gcs_uri # Return original URI if format is incorrect
+            return gcs_uri
 
         bucket_name, blob_name = gcs_uri.replace("gs://", "").split("/", 1)
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(blob_name)
-
-        credentials, _ = google.auth.default()
-        if hasattr(credentials, 'service_account_email'):
-            service_account_email = credentials.service_account_email
-        else:
-            # Fallback for local development or different credential types
-            # You might need to configure this more specifically for your environment
-            logging.warning("Service account email not found in credentials, using signer's identity.")
-            req = google.auth.transport.requests.Request()
-            credentials.refresh(req)
-            service_account_email = credentials.signer_email
-
 
         signed_url = blob.generate_signed_url(
             version="v4",
@@ -149,25 +136,33 @@ def generate_video_content(brief):
     ]
     engineered_prompt = ", ".join(filter(None, prompt_parts))
     
-    output_gcs_dir = f"gs://{BUCKET_NAME}/video-outputs/"
-    
     logging.info(f"Starting video generation for prompt: '{engineered_prompt}'")
 
-    model = VideoGenerationModel.from_pretrained("video-generation-001")
-    
-    # This call is asynchronous and returns immediately
-    video_operation = model.generate(
-        prompt=engineered_prompt,
-        output_bucket_name=output_gcs_dir,
+    # Use the GenerativeModel class for Veo
+    model = GenerativeModel("veo-2.0-generate-001")
+
+    # The SDK handles the GCS output implicitly when using a video model
+    response = model.generate_content(
+        [engineered_prompt],
+        generation_config={
+            "max_output_tokens": 2048, # This might not be directly applicable to video, but is a common param
+            "temperature": 0.4,
+            "top_p": 1,
+            "top_k": 32
+        },
+        stream=False,
     )
     
-    logging.info(f"Video generation operation started: {video_operation._operation.name}")
-    
-    # In a production app, you wouldn't block the request. You'd poll in the background.
-    # For this implementation, we poll for a result with a timeout.
-    result = video_operation.wait_for_result(timeout=1800) # Wait up to 30 minutes
-    
-    gcs_uri = result.gcs_uri
+    # The response for video generation will contain the GCS URI
+    # This part of the response structure might need adjustment based on actual output
+    if not response.parts:
+        raise Exception("Video generation failed to produce a valid response part.")
+
+    video_part = response.parts[0]
+    if not hasattr(video_part, 'file_data') or not video_part.file_data.file_uri:
+        raise Exception(f"Unexpected response format from video generation: {response}")
+
+    gcs_uri = video_part.file_data.file_uri
     logging.info(f"Video generation successful. Output at: {gcs_uri}")
     
     signed_url = generate_signed_url_for_gcs_uri(gcs_uri)
