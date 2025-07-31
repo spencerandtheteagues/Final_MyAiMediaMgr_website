@@ -2,10 +2,10 @@ import { useState, useCallback, useEffect } from 'react';
 import { Sparkles, Send, Image, Video, Type, Copy, Check, UploadCloud, FileText, Rocket } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input'; // Using Input for single-line fields
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -31,7 +31,7 @@ function GenerateContent({ user }) {
   const [creationMode, setCreationMode] = useState('ai');
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   
-  // AI State - Intelligent Content Brief
+  // AI State
   const [contentType, setContentType] = useState('image');
   const [brief, setBrief] = useState({
     mainSubject: '',
@@ -52,6 +52,8 @@ function GenerateContent({ user }) {
   const [generatedMediaType, setGeneratedMediaType] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   const onDrop = useCallback(acceptedFiles => {
     const file = acceptedFiles[0];
@@ -120,7 +122,7 @@ function GenerateContent({ user }) {
       const result = await response.json();
 
       if (result.success) {
-        toast.success("Content Generated!", { description: "Your AI content has been successfully created." });
+        toast.success("Content Generated!", { description: "Your AI content is ready for review." });
         if (result.data.text) setGeneratedContent(result.data.text);
         if (result.data.media_url) {
           setGeneratedMedia(result.data.media_url);
@@ -138,19 +140,62 @@ function GenerateContent({ user }) {
     }
   };
 
-  const handleManualSubmit = async (postNow = false) => {
-    // This function remains the same
+  const handleSendToApproval = async () => {
+    if (!generatedContent || !generatedMedia || !user?.id || selectedPlatforms.length === 0) {
+        toast.error("Cannot Send to Queue", {
+            description: "Generated content, media, and selected platforms are required.",
+        });
+        return;
+    }
+
+    setIsSubmitting(true);
+    toast.info("Sending to Approval Queue...");
+
+    try {
+        const payload = {
+            uid: user.id,
+            text: generatedContent,
+            media_url: generatedMedia,
+            media_type: generatedMediaType,
+            platforms: selectedPlatforms,
+        };
+
+        const response = await fetch('/api/content/manual', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: 'Server returned an invalid response.' }));
+            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+            toast.success("Content Sent!", { description: "The post has been added to the approval queue." });
+            // Reset state after successful submission
+            setGeneratedContent('');
+            setGeneratedMedia(null);
+            setGeneratedMediaType('');
+        } else {
+            throw new Error(result.error || 'Failed to send to approval queue.');
+        }
+    } catch (error) {
+        console.error('Failed to send to approval queue:', error);
+        toast.error("Submission Failed", { description: error.message });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
+
 
   const handleCopy = (text) => {
     if (!text) return;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const PreviewBox = () => {
-    // This component remains largely the same
   };
 
   return (
@@ -279,6 +324,15 @@ function GenerateContent({ user }) {
                   <div className="text-center text-slate-500"><Image className="w-12 h-12 mx-auto mb-4" /><p>Generated visuals will appear here.</p></div>
                 )}
               </CardContent>
+              <CardFooter>
+                <Button 
+                  onClick={handleSendToApproval} 
+                  disabled={!generatedMedia || !generatedContent || loading || isSubmitting}
+                  className="w-full h-12 text-base font-semibold bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Submitting...' : <><Send className="w-4 h-4 mr-2" /><span>Send to Approval Queue</span></>}
+                </Button>
+              </CardFooter>
             </Card>
           </div>
         </div>
