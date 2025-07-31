@@ -1,1 +1,1 @@
-chore: remove temporary commit message file
+refactor: Print admin user ID in seeder

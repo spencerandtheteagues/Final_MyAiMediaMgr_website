@@ -37,6 +37,7 @@ def create_or_update_admin():
             print("Admin user created successfully.")
         
         db.session.commit()
+        print(f"Admin user ID: {user.id}")
 
 if __name__ == '__main__':
     create_or_update_admin()
