@@ -8,19 +8,8 @@ import google.auth.transport.requests
 from src.models.user import User
 from src.database import db
 import vertexai
-from vertexai.generative_models import GenerativeModel, Image
+from vertexai.preview.generative_models import GenerativeModel, Image
 from vertexai.preview.vision_models import ImageGenerationModel
-from vertexai.preview.generative_models import Part
-from vertexai.language_models import TextGenerationModel
-from vertexai.vision_models import ImageGenerationModel
-import vertexai.generative_models as generative_models
-from vertexai.preview.vision_models import ImageGenerationModel
-from vertexai.preview.generative_models import Part
-from vertexai.language_models import TextGenerationModel
-from vertexai.vision_models import ImageGenerationModel
-from vertexai.generative_models import Model
-from vertexai.preview.vision_models import ImageGenerationModel
-from vertexai.generative_models._generative_models import Part
 import logging
 from google.api_core import exceptions
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
@@ -157,7 +146,7 @@ def generate_image_content(brief):
     retry=retry_if_exception_type(exceptions.ResourceExhausted)
 )
 def generate_video_content(brief):
-    """Generates a video using the low-level Veo API and returns the signed URL."""
+    """Generates a video using Veo on Vertex AI and returns the signed URL."""
     prompt_parts = [
         brief.get('mainSubject'), brief.get('setting'), brief.get('style'), brief.get('details')
     ]
@@ -165,38 +154,27 @@ def generate_video_content(brief):
     
     logging.info(f"Starting video generation for prompt: '{engineered_prompt}'")
 
-    # Use a generic Model class to call the predictLongRunning endpoint
-    model = vertexai.Model(model_name="veo-3.0-fast-generate-preview")
+    model = GenerativeModel("veo-2.0-generate-001")
 
-    instances = [{"prompt": engineered_prompt}]
-    parameters = {
-        "storageUri": f"gs://{BUCKET_NAME}/video-outputs/{int(time.time())}/",
-        "durationSeconds": 6,
-        "sampleCount": 1,
-        "enhancePrompt": True,
-        "generateAudio": False
-    }
-
-    # This is the Python SDK equivalent of the REST API's predictLongRunning
-    operation = model.predict_long_running(instances=instances, parameters=parameters)
+    response = model.generate_content(
+        [engineered_prompt],
+        generation_config={
+            "max_output_tokens": 2048,
+            "temperature": 0.4,
+            "top_p": 1,
+            "top_k": 32
+        },
+        stream=False,
+    )
     
-    logging.info(f"Video generation operation started: {operation.operation.name}")
-    
-    # Wait for the operation to complete
-    result = operation.result()
+    if not response.parts:
+        raise Exception("Video generation failed to produce a valid response part.")
 
-    # The result object from predict_long_running is a list of predictions.
-    # We need to parse it to get the GCS URI.
-    if not result.predictions:
-        raise Exception("Video generation operation completed but returned no predictions.")
+    video_part = response.parts[0]
+    if not hasattr(video_part, 'file_data') or not video_part.file_data.file_uri:
+        raise Exception(f"Unexpected response format from video generation: {response}")
 
-    # The prediction result is a protobuf object that needs to be converted to a dict
-    prediction_dict = type(result.predictions[0]).to_dict(result.predictions[0])
-    
-    if 'gcsUri' not in prediction_dict:
-        raise Exception(f"Unexpected response format from video generation: {prediction_dict}")
-
-    gcs_uri = prediction_dict['gcsUri']
+    gcs_uri = video_part.file_data.file_uri
     logging.info(f"Video generation successful. Output at: {gcs_uri}")
     
     signed_url = generate_signed_url_for_gcs_uri(gcs_uri)
