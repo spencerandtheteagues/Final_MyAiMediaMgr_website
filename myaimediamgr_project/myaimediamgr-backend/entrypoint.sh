@@ -10,4 +10,4 @@ python -m src.seed_admin
 echo "--- Seeding Complete ---"
 
 echo "--- Starting Gunicorn ---"
-exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 src.main:app
+exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 0 src.main:app

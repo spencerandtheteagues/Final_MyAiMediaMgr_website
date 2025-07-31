@@ -1,5 +1,5 @@
-fix(video): Correct generic Model import for Veo API call
+fix(deploy): Correct gunicorn port binding in entrypoint
 
-This commit fixes a container startup crash caused by an `AttributeError`.
+This commit fixes a container startup failure on Cloud Run.
 
-The `vertexai.Model` class was being called incorrectly. The import statement has been corrected to `import vertexai.generative_models as generative_models` to properly load the generic model class required for the low-level `predict_long_running` API call to the Veo model.
+The `gunicorn` command in `entrypoint.sh` was using an incorrect `--bind` syntax (`:$PORT`). This has been corrected to `--bind 0.0.0.0:$PORT` to properly listen on the port provided by the Cloud Run environment.
