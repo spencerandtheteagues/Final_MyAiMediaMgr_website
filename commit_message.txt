@@ -1,1 +1,10 @@
-chore: Revert debugging changes from seeder
+fix(video): Implement correct low-level Veo API call
+
+This commit resolves all remaining video generation issues by refactoring the implementation to match the official REST API documentation for the Veo model.
+
+- Replaces the high-level `GenerativeModel` abstraction with a generic `vertexai.Model` instance.
+- Implements a call to the `predict_long_running` method, which is the correct Python SDK equivalent for the `predictLongRunning` REST endpoint required by Veo.
+- Constructs the `instances` and `parameters` payload as a Python dictionary that exactly matches the documented JSON structure, including `storageUri` and `durationSeconds`.
+- Handles the `operation.result()` and correctly parses the protobuf prediction object to extract the final GCS URI.
+
+This is the definitive fix that aligns the application's behavior with the specific requirements of the Veo API.
