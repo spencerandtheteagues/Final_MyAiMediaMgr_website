@@ -8,8 +8,8 @@ import google.auth.transport.requests
 from src.models.user import User
 from src.database import db
 import vertexai
-from vertexai.preview.generative_models import GenerativeModel, Image
-from vertexai.preview.vision_models import ImageGenerationModel
+from vertexai.generative_models import GenerativeModel, Image
+from vertexai.preview.vision_models import ImageGenerationModel, VideoGenerationModel
 import logging
 from google.api_core import exceptions
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
@@ -154,27 +154,21 @@ def generate_video_content(brief):
     
     logging.info(f"Starting video generation for prompt: '{engineered_prompt}'")
 
-    model = GenerativeModel("veo-2.0-generate-001")
-
-    response = model.generate_content(
-        [engineered_prompt],
-        generation_config={
-            "max_output_tokens": 2048,
-            "temperature": 0.4,
-            "top_p": 1,
-            "top_k": 32
-        },
-        stream=False,
+    model = VideoGenerationModel.from_pretrained("veo-3.0-fast-generate-preview")
+    
+    video_result = model.generate(
+        prompt=engineered_prompt,
+        high_quality=False 
     )
     
-    if not response.parts:
-        raise Exception("Video generation failed to produce a valid response part.")
+    video_bytes = video_result.load()
 
-    video_part = response.parts[0]
-    if not hasattr(video_part, 'file_data') or not video_part.file_data.file_uri:
-        raise Exception(f"Unexpected response format from video generation: {response}")
+    file_name = f"generated-media/video-{int(time.time())}.mp4"
+    bucket = storage_client.bucket(BUCKET_NAME)
+    blob = bucket.blob(file_name)
+    blob.upload_from_string(video_bytes, content_type='video/mp4')
 
-    gcs_uri = video_part.file_data.file_uri
+    gcs_uri = f"gs://{BUCKET_NAME}/{file_name}"
     logging.info(f"Video generation successful. Output at: {gcs_uri}")
     
     signed_url = generate_signed_url_for_gcs_uri(gcs_uri)
