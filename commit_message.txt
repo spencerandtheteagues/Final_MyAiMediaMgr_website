@@ -1,1 +1,1 @@
-refactor: Print admin user ID in seeder
+refactor: Write admin user ID to a file in seeder
