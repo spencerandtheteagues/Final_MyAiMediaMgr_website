@@ -8,8 +8,8 @@ import google.auth.transport.requests
 from src.models.user import User
 from src.database import db
 import vertexai
-from vertexai.preview.vision_models import ImageGenerationModel, Image
-import google.generativeai as genai
+from vertexai.generative_models import GenerativeModel, Image
+from vertexai.preview.vision_models import ImageGenerationModel
 import logging
 
 content_bp = Blueprint('content', __name__)
@@ -25,6 +25,7 @@ storage_client = storage.Client()
 firestore_db = firestore.Client(project=PROJECT_ID)
 
 if os.getenv("GEMINI_API_KEY"):
+    import google.generativeai as genai
     genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 else:
     logging.warning("GEMINI_API_KEY not found. Video generation will be disabled.")
@@ -56,14 +57,55 @@ def check_and_decrement_quota(user, content_type):
 
 # --- AI Model Generation Functions ---
 
-def generate_text_content(prompt):
-    # This function is a placeholder as text is generated with the media
-    return f"A generated caption for the theme: {prompt}"
+def generate_caption_for_image(image_bytes, theme, platforms):
+    """Generates a caption for a given image using a multimodal model, tailored to platform constraints."""
+    model = GenerativeModel("gemini-2.5-flash")
+    image = Image.from_bytes(image_bytes)
+    
+    platform_map = {
+        'twitter': {'name': 'X', 'limit': 280},
+        'instagram': {'name': 'Instagram', 'limit': 2200},
+        'linkedin': {'name': 'LinkedIn', 'limit': 3000},
+        'facebook': {'name': 'Facebook', 'limit': 63206},
+        'tiktok': {'name': 'TikTok', 'limit': 2200},
+        'youtube': {'name': 'YouTube', 'limit': 10000}
+    }
 
-def generate_image_content(prompt):
+    selected_platforms_details = [p for p in [platform_map.get(p_id) for p_id in platforms] if p]
+    
+    if not selected_platforms_details:
+        strictest_limit = 280 # Default fallback
+        platform_details_string = "general social media"
+    else:
+        strictest_limit = min(p['limit'] for p in selected_platforms_details)
+        platform_details_string = ", ".join([f"{p['name']} ({p['limit']} characters)" for p in selected_platforms_details])
+
+    prompt = [
+        f"You are an expert social media manager. Analyze this image and the user's original theme. Write an engaging and concise caption for a social media post.",
+        f"The caption will be used on the following platforms: {platform_details_string}.",
+        f"CRUCIALLY, the entire caption must be no more than {strictest_limit} characters long to be compatible with all selected platforms.",
+        "The caption must be relevant to both the image and the theme. Include 2-3 relevant hashtags.",
+        f"User's Theme: {theme}",
+        image
+    ]
+    
+    response = model.generate_content(prompt)
+    return response.text
+
+def generate_image_content(brief):
+    """Generates an image and returns the signed URL and the image bytes."""
+    # Engineer a detailed prompt from the structured brief
+    prompt_parts = [
+        brief.get('mainSubject'),
+        brief.get('setting'),
+        brief.get('style'),
+        brief.get('details')
+    ]
+    engineered_prompt = ", ".join(filter(None, prompt_parts))
+
     model = ImageGenerationModel.from_pretrained("imagegeneration@006")
     images = model.generate_images(
-        prompt=prompt,
+        prompt=engineered_prompt,
         number_of_images=1,
     )
     
@@ -84,42 +126,11 @@ def generate_image_content(prompt):
         service_account_email=credentials.service_account_email,
         access_token=credentials.token,
     )
-    return signed_url
+    return signed_url, image_bytes
 
 def generate_video_content(prompt):
-    if not genai:
-        raise Exception("Video generation is disabled due to missing GEMINI_API_KEY.")
-        
-    output_gcs_uri = f"gs://{BUCKET_NAME}/generated-media/"
-    operation = genai.generate_videos(
-        model="veo-001", prompt=prompt, output_gcs_uri=output_gcs_uri
-    )
-    logging.info("Waiting for video generation operation to complete...")
-    operation.result()
-
-    if operation.error:
-        raise Exception(f"Video generation failed: {operation.error.message}")
-
-    video_uri = operation.result.generated_videos[0].video.uri
-    if video_uri.startswith(f'gs://{BUCKET_NAME}/'):
-        blob_name = video_uri.replace(f'gs://{BUCKET_NAME}/', '')
-        blob = storage_client.bucket(BUCKET_NAME).blob(blob_name)
-        if blob.exists():
-            credentials, _ = google.auth.default()
-            credentials.refresh(google.auth.transport.requests.Request())
-            
-            signed_url = blob.generate_signed_url(
-                version="v4",
-                expiration=datetime.now(timezone.utc) + timedelta(minutes=15),
-                method="GET",
-                service_account_email=credentials.service_account_email,
-                access_token=credentials.token,
-            )
-            return signed_url
-        else:
-            raise Exception("Generated video file not found in GCS.")
-    else:
-        raise Exception(f"Unexpected video URI format: {video_uri}")
+    # This is a placeholder for the future migration to the new SDK
+    raise NotImplementedError("Video generation is not yet fully migrated.")
 
 # --- API Endpoints ---
 
@@ -127,12 +138,13 @@ def generate_video_content(prompt):
 def generate_content_route():
     try:
         data = request.get_json()
-        theme = data.get('theme')
+        brief = data.get('brief')
         uid = data.get('uid')
-        content_type = data.get('contentType', 'text')
+        content_type = data.get('contentType')
+        platforms = data.get('platforms')
         
-        if not theme or not uid:
-            return jsonify({'success': False, 'error': 'Theme and uid are required'}), 400
+        if not brief or not uid or not content_type or not platforms:
+            return jsonify({'success': False, 'error': 'Missing required fields'}), 400
 
         user = get_user_or_404(uid)
         check_and_decrement_quota(user, content_type)
@@ -140,15 +152,14 @@ def generate_content_route():
         text_content, media_url, media_type = "", None, None
 
         if content_type == 'image':
-            media_url = generate_image_content(theme)
+            media_url, image_bytes = generate_image_content(brief)
             media_type = 'image'
-            text_content = f"An AI-generated image based on the theme: {theme}"
+            text_content = generate_caption_for_image(image_bytes, brief.get('captionTheme'), platforms)
         elif content_type == 'video':
-            media_url = generate_video_content(theme)
+            # For now, video generation is not fully implemented with the new brief
+            media_url = generate_video_content(brief.get('mainSubject'))
             media_type = 'video'
-            text_content = f"An AI-generated video based on the theme: {theme}"
-        else:
-            text_content = generate_text_content(theme)
+            text_content = f"An AI-generated video based on the theme: {brief.get('captionTheme')}"
         
         db.session.commit()
         return jsonify({'success': True, 'data': {'text': text_content, 'media_url': media_url, 'media_type': media_type}})
