@@ -1,1 +1,1 @@
-fix(api): correct import for ImageGenerationModel
+fix(api): add missing import for vertexai

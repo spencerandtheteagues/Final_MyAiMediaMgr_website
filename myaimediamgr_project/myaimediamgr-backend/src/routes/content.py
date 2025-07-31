@@ -7,10 +7,12 @@ import google.auth
 import google.auth.transport.requests
 from src.models.user import User
 from src.database import db
-from vertexai.preview.vision_models import ImageGenerationModel
+from google.cloud import aiplatform
 from google.api_core import exceptions
 import base64
 import logging
+import vertexai
+from vertexai.preview.vision_models import ImageGenerationModel
 
 content_bp = Blueprint('content', __name__)
 
