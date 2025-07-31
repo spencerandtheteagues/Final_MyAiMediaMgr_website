@@ -1,10 +1,5 @@
-fix(video): Implement correct low-level Veo API call
+fix(video): Correct generic Model import for Veo API call
 
-This commit resolves all remaining video generation issues by refactoring the implementation to match the official REST API documentation for the Veo model.
+This commit fixes a container startup crash caused by an `AttributeError`.
 
-- Replaces the high-level `GenerativeModel` abstraction with a generic `vertexai.Model` instance.
-- Implements a call to the `predict_long_running` method, which is the correct Python SDK equivalent for the `predictLongRunning` REST endpoint required by Veo.
-- Constructs the `instances` and `parameters` payload as a Python dictionary that exactly matches the documented JSON structure, including `storageUri` and `durationSeconds`.
-- Handles the `operation.result()` and correctly parses the protobuf prediction object to extract the final GCS URI.
-
-This is the definitive fix that aligns the application's behavior with the specific requirements of the Veo API.
+The `vertexai.Model` class was being called incorrectly. The import statement has been corrected to `from vertexai.generative_models import Model` to properly load the generic model class required for the low-level `predict_long_running` API call to the Veo model.

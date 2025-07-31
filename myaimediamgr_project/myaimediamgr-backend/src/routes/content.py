@@ -8,7 +8,7 @@ import google.auth.transport.requests
 from src.models.user import User
 from src.database import db
 import vertexai
-from vertexai.generative_models import GenerativeModel, Image
+from vertexai.generative_models import GenerativeModel, Image, Model
 from vertexai.preview.vision_models import ImageGenerationModel
 from vertexai.generative_models._generative_models import Part
 import logging
