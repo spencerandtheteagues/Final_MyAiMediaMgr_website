@@ -7,12 +7,28 @@ import google.auth
 import google.auth.transport.requests
 from src.models.user import User
 from src.database import db
-from google.cloud import aiplatform
-from google.api_core import exceptions
-import base64
-import logging
-import vertexai
 from vertexai.preview.vision_models import ImageGenerationModel
+import google.generativeai as genai
+import logging
+
+content_bp = Blueprint('content', __name__)
+
+# --- Environment Setup ---
+PROJECT_ID = os.getenv('GOOGLE_PROJECT_ID', 'final-myaimediamgr-website')
+LOCATION = "us-central1"
+BUCKET_NAME = "final-myaimediamgr-website-media"
+
+# --- Correct Initialization ---
+vertexai.init(project=PROJECT_ID, location=LOCATION)
+storage_client = storage.Client()
+firestore_db = firestore.Client(project=PROJECT_ID)
+
+# Correctly configure the genai library with the API key
+if os.getenv("GEMINI_API_KEY"):
+    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+else:
+    logging.warning("GEMINI_API_KEY not found. Video generation will be disabled.")
+    genai = None
 
 content_bp = Blueprint('content', __name__)
 
@@ -68,8 +84,7 @@ def generate_text_content(prompt):
     return f"A generated caption for the theme: {prompt}"
 
 def generate_image_content(prompt):
-    # Use the correct, modern model identifier for Imagen 4
-    model = aiplatform.ImageGenerationModel.from_pretrained("imagen-4-0-text-to-image")
+    model = ImageGenerationModel.from_pretrained("imagegeneration@006")
     response = model.generate_images(
         prompt=prompt,
         number_of_images=1,
