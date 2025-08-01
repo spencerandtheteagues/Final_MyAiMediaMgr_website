@@ -1,5 +1,12 @@
-fix(deploy): Use correct builder for migration step
+fix(deploy): Implement definitive Cloud Build pipeline
 
-This commit fixes a Cloud Build failure by specifying the correct builder image for the database migration step.
+This commit resolves all remaining deployment issues by implementing the correct, robust CI/CD pipeline for a Flask application on Google Cloud Run.
 
-The `gcr.io/cloud-builders/docker` image does not include the `gcloud` CLI, which was causing the secret access command to fail. The build step has been updated to use the `gcr.io/google.com/cloudsdktool/cloud-sdk` image, which provides both the `gcloud` and `docker` CLIs.
+- **`cloudbuild.yaml`:**
+  - The migration step now correctly uses the `gcr.io/google.com/cloudsdktool/cloud-sdk` builder, which contains both the `gcloud` and `docker` CLIs.
+  - The `docker run` command for the migration now includes the `--network=cloudbuild` flag to ensure connectivity.
+  - The final deployment step is streamlined.
+- **`entrypoint.sh`:**
+  - The script is now simplified to only start the Gunicorn server, making the container's purpose singular and reliable.
+
+This is the definitive fix that establishes a production-grade deployment pipeline.
