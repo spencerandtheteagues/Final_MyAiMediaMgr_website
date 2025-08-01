@@ -8,7 +8,7 @@ steps:
     args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/myaimediamgr-repo/myaimediamgr-prod:latest']
 
   # Step 3: Run Database Migrations using the new image
-  - name: 'gcr.io/cloud-builders/gcloud'
+  - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args:
       - '-c'

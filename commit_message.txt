@@ -1,8 +1,5 @@
-fix(deploy): Separate migrations into Cloud Build step
+fix(deploy): Use correct builder for migration step
 
-This commit resolves the container startup failure by adopting the best practice of running database migrations in a dedicated Cloud Build step instead of the application's entrypoint script.
+This commit fixes a Cloud Build failure by specifying the correct builder image for the database migration step.
 
-- **`cloudbuild.yaml`:** A new build step has been added to run `flask db upgrade` after the container image is built but before it is deployed. This step is configured with access to the `DATABASE_URL` secret.
-- **`entrypoint.sh`:** The script has been simplified to only be responsible for starting the Gunicorn web server. The fragile migration and seeding commands have been removed.
-
-This creates a more robust and reliable deployment pipeline, ensuring that the application container's only responsibility is to run the application itself.
+The `gcr.io/cloud-builders/gcloud` image does not include the Docker CLI, which was causing the `docker run` command to fail. The build step has been updated to use the `gcr.io/cloud-builders/docker` image, which provides the necessary tools to execute the migration container.
