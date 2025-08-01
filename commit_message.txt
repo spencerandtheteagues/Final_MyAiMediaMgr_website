@@ -2,4 +2,4 @@ fix(deploy): Use correct builder for migration step
 
 This commit fixes a Cloud Build failure by specifying the correct builder image for the database migration step.
 
-The `gcr.io/cloud-builders/gcloud` image does not include the Docker CLI, which was causing the `docker run` command to fail. The build step has been updated to use the `gcr.io/cloud-builders/docker` image, which provides the necessary tools to execute the migration container.
+The `gcr.io/cloud-builders/docker` image does not include the `gcloud` CLI, which was causing the secret access command to fail. The build step has been updated to use the `gcr.io/google.com/cloudsdktool/cloud-sdk` image, which provides both the `gcloud` and `docker` CLIs.
